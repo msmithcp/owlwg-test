@@ -216,26 +216,6 @@
 	  </rdfs:subClassOf>
 	</rdf:Description>
 
-	<owl:Class>
-	  <owl:intersectionOf rdf:parseType="Collection">
-	    <rdf:Description rdf:about="&test;TestCase" />
-	    <owl:Class>
-	      <owl:complementOf>
-	        <owl:Restriction>
-	          <owl:onProperty rdf:resource="&test;species" />
-	          <owl:hasValue rdf:resource="&test;DL" />
-	        </owl:Restriction>
-	      </owl:complementOf>
-	    </owl:Class>
-	  </owl:intersectionOf>
-	  <rdfs:subClassOf>
-	    <owl:Restriction>
-	      <owl:onProperty rdf:resource="&test;normativeSyntax" />
-	      <owl:hasValue rdf:resource="&test;RDFXML" />
-	    </owl:Restriction>
-	  </rdfs:subClassOf>
-	</owl:Class>
-
 	<owl:ObjectProperty rdf:about="&test;semantics">
 	  <rdfs:range>
 	    <owl:Class>
