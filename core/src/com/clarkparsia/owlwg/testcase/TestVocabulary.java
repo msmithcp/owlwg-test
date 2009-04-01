@@ -70,9 +70,9 @@ public class TestVocabulary {
 	}
 
 	public enum Individual {
-		APPROVED("Approved"), DL("DL"), EL("EL"), FULL("FULL"), FUNCTIONAL("FUNCTIONAL"),
-		OWLXML("OWLXML"), PROPOSED("Proposed"), QL("QL"), RDFXML("RDFXML"), REJECTED("Rejected"),
-		RL("RL");
+		APPROVED("Approved"), DIRECT("DIRECT"), DL("DL"), EL("EL"), FULL("FULL"),
+		FUNCTIONAL("FUNCTIONAL"), OWLXML("OWLXML"), PROPOSED("Proposed"), QL("QL"),
+		RDF_BASED("RDF-BASED"), RDFXML("RDFXML"), REJECTED("Rejected"), RL("RL");
 
 		private final OWLIndividual	i;
 

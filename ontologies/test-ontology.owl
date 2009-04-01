@@ -240,8 +240,8 @@
 	  <rdfs:range>
 	    <owl:Class>
 	      <owl:oneOf rdf:parseType="Collection">
-	        <rdf:Description rdf:about="&test;DL" />
-	        <rdf:Description rdf:about="&test;FULL" />
+	        <rdf:Description rdf:about="&test;DIRECT" />
+	        <rdf:Description rdf:about="&test;RDF-BASED" />
 	      </owl:oneOf>
 	    </owl:Class>
 	  </rdfs:range>
@@ -259,7 +259,7 @@
 	      <owl:complementOf>
 	        <owl:Restriction>
 	          <owl:onProperty rdf:resource="&test;semantics" />
-	          <owl:hasValue rdf:resource="&test;FULL" />
+	          <owl:hasValue rdf:resource="&test;RDF-BASED" />
 	        </owl:Restriction>
 	      </owl:complementOf>
 	    </owl:Class>
@@ -267,7 +267,7 @@
 	  <rdfs:subClassOf>
 	    <owl:Restriction>
 	      <owl:onProperty rdf:resource="&test;alternativeSemanticsTest" />
-	      <owl:hasValue rdf:resource="&test;FULL" />
+	      <owl:hasValue rdf:resource="&test;RDF-BASED" />
 	    </owl:Restriction>
 	  </rdfs:subClassOf>
 	</owl:Class>

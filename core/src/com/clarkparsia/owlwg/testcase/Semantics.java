@@ -28,11 +28,11 @@ public enum Semantics {
 	/**
 	 * OWL 2 Direct Semantics
 	 */
-	DIRECT(Individual.DL),
+	DIRECT(Individual.DIRECT),
 	/**
 	 * OWL 2 RDF Based Semantics
 	 */
-	RDF(Individual.FULL);
+	RDF(Individual.RDF_BASED);
 
 	public static Semantics get(OWLIndividual i) {
 		for( Semantics s : values() ) {
