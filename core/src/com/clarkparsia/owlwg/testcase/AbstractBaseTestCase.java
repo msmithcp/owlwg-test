@@ -6,6 +6,7 @@ import static com.clarkparsia.owlwg.testcase.TestVocabulary.ObjectProperty.PROFI
 import static com.clarkparsia.owlwg.testcase.TestVocabulary.ObjectProperty.SEMANTICS;
 import static com.clarkparsia.owlwg.testcase.TestVocabulary.ObjectProperty.SPECIES;
 import static com.clarkparsia.owlwg.testcase.TestVocabulary.ObjectProperty.STATUS;
+import static java.lang.String.format;
 import static java.util.Collections.unmodifiableSet;
 
 import java.util.EnumSet;
@@ -80,7 +81,9 @@ public abstract class AbstractBaseTestCase implements TestCase {
 			OWLIndividual s = statuses.iterator().next();
 			status = Status.get( s );
 			if( status == null )
-				throw new NullPointerException( s.getURI().toASCIIString() );
+				throw new NullPointerException( format(
+						"Unexpected status ( %s ) for test case %s", s.getURI().toASCIIString(), i
+								.getURI() ) );
 		}
 
 		satisfied = EnumSet.noneOf( SyntaxConstraint.class );
@@ -89,7 +92,9 @@ public abstract class AbstractBaseTestCase implements TestCase {
 			for( OWLIndividual p : profiles ) {
 				SyntaxConstraint c = SyntaxConstraint.get( p );
 				if( c == null )
-					throw new NullPointerException( p.getURI().toASCIIString() );
+					throw new NullPointerException( format(
+							"Unexpected profile ( %s ) for test case %s", p.getURI()
+									.toASCIIString(), i.getURI() ) );
 				satisfied.add( c );
 			}
 		}
@@ -102,7 +107,9 @@ public abstract class AbstractBaseTestCase implements TestCase {
 				if( Individual.DL.getOWLIndividual().equals( s ) )
 					satisfied.add( SyntaxConstraint.DL );
 				else
-					throw new IllegalArgumentException( s.getURI().toASCIIString() );
+					throw new IllegalArgumentException( format(
+							"Unexpected species ( %s ) for test case %s", s.getURI()
+									.toASCIIString(), i.getURI() ) );
 			}
 		}
 
@@ -112,7 +119,9 @@ public abstract class AbstractBaseTestCase implements TestCase {
 			for( OWLIndividual sem : sems ) {
 				Semantics s = Semantics.get( sem );
 				if( s == null )
-					throw new NullPointerException( sem.getURI().toASCIIString() );
+					throw new NullPointerException( format(
+							"Unexpected semantics ( %s ) for test case %s ", sem.getURI()
+									.toASCIIString(), i.getURI() ) );
 				semantics.add( s );
 			}
 		}
@@ -127,7 +136,9 @@ public abstract class AbstractBaseTestCase implements TestCase {
 			for( OWLIndividual p : notprofiles ) {
 				SyntaxConstraint c = SyntaxConstraint.get( p );
 				if( c == null )
-					throw new NullPointerException( p.getURI().toASCIIString() );
+					throw new NullPointerException( format(
+							"Unexpected profile ( %s ) for test case %s", p.getURI()
+									.toASCIIString(), i.getURI() ) );
 				notsatisfied.add( c );
 			}
 		}
@@ -138,7 +149,9 @@ public abstract class AbstractBaseTestCase implements TestCase {
 				if( Individual.DL.getOWLIndividual().equals( s ) )
 					notsatisfied.add( SyntaxConstraint.DL );
 				else
-					throw new IllegalArgumentException( s.getURI().toASCIIString() );
+					throw new IllegalArgumentException( format(
+							"Unexpected species ( %s ) for test case %s", s.getURI()
+									.toASCIIString(), i.getURI() ) );
 			}
 		}
 
@@ -148,7 +161,9 @@ public abstract class AbstractBaseTestCase implements TestCase {
 			for( OWLIndividual sem : notsems ) {
 				Semantics s = Semantics.get( sem );
 				if( s == null )
-					throw new NullPointerException( sem.getURI().toASCIIString() );
+					throw new NullPointerException( format(
+							"Unexpected semantics ( %s ) for test case %s", sem.getURI()
+									.toASCIIString(), i.getURI() ) );
 				notsemantics.add( s );
 			}
 		}
