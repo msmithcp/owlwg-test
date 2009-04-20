@@ -36,7 +36,7 @@ public class HermiTTestRunner extends OWLReasonerTestRunner {
     }
 
     public static void main(String[] args) {
-        System.setProperty("Harness.TestRunner", "com.clarkparsia.owlwg.runner.hermit.HermiTTestRunner");    
+        System.setProperty(Harness.TEST_RUNNER_CLASS_PROPERTY, "com.clarkparsia.owlwg.runner.hermit.HermiTTestRunner");    
         Harness.main(new String[] {"http://wiki.webont.org/exports/all.rdf"});
     }
     
