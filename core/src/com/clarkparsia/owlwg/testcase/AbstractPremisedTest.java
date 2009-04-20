@@ -51,10 +51,13 @@ public abstract class AbstractPremisedTest extends AbstractBaseTestCase {
 		for( SerializationFormat f : SerializationFormat.values() ) {
 			Set<OWLConstant> premises = values.get( f.getPremiseOWLDataProperty() );
 			if( premises != null ) {
-				if( premises.size() != 1 )
-					throw new IllegalArgumentException( f.toString() );
-				premiseOntologyLiteral.put( f, premises.iterator().next().getLiteral() );
-				premiseFormats.add( f );
+				if( premises.size() != 1 ) {
+				         System.err.println("Error: " + f.toString());
+					//throw new IllegalArgumentException( f.toString() );
+				} else {
+				    premiseOntologyLiteral.put( f, premises.iterator().next().getLiteral() );
+				    premiseFormats.add( f );
+				}
 			}
 		}
 	}

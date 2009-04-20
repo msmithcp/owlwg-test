@@ -2,54 +2,42 @@ package com.clarkparsia.owlwg.runner.hermit;
 
 import java.net.URI;
 
-import org.semanticweb.HermiT.HermitReasoner;
-import org.semanticweb.owl.inference.OWLReasoner;
-import org.semanticweb.owl.inference.OWLReasonerFactory;
+import org.semanticweb.HermiT.Configuration;
+import org.semanticweb.HermiT.Reasoner;
+import org.semanticweb.owl.inference.OWLReasonerException;
+import org.semanticweb.owl.model.OWLAxiom;
+import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
 
+import com.clarkparsia.owlwg.Harness;
 import com.clarkparsia.owlwg.runner.OWLReasonerTestRunner;
 
-/**
- * <p>
- * Title: HermiT Test Runner
- * </p>
- * <p>
- * Description:
- * </p>
- * <p>
- * Copyright: Copyright &copy; 2009
- * </p>
- * <p>
- * Company: Clark & Parsia, LLC. <a
- * href="http://clarkparsia.com/"/>http://clarkparsia.com/</a>
- * </p>
- * 
- * @author Mike Smith &lt;msmith@clarkparsia.com&gt;
- */
 public class HermiTTestRunner extends OWLReasonerTestRunner {
 
-	private static class ReasonerFactory implements OWLReasonerFactory {
+    public HermiTTestRunner() {
+        super(new Reasoner.ReasonerFactory(), URI
+                .create("http://hermit-reasoner.com/"));
+    }
 
-		public OWLReasoner createReasoner(OWLOntologyManager manager) {
-			return new HermitReasoner( manager );
-		}
+    @Override
+    protected boolean isEntailed(OWLOntologyManager manager,
+            OWLOntology premise, OWLOntology conclusion)
+            throws OWLReasonerException {
 
-		public String getReasonerName() {
-			return "HermiT";
-		}
+        Reasoner reasoner = new Reasoner(new Configuration(), manager, premise);
+        EntailmentChecker checker = new EntailmentChecker(reasoner, manager
+                .getOWLDataFactory());
+        for (OWLAxiom axiom : conclusion.getLogicalAxioms()) {
+            if (!checker.isEntailed(axiom))
+                return false;
+        }
 
-	}
+        return true;
+    }
 
-	private static final ReasonerFactory	factory;
-	private static final URI				uri;
-
-	static {
-		factory = new ReasonerFactory();
-		uri = URI.create( "http://hermit-reasoner.com/" );
-	}
-
-	public HermiTTestRunner() {
-		super( factory, uri );
-	}
-
+    public static void main(String[] args) {
+        System.setProperty("Harness.TestRunner", "com.clarkparsia.owlwg.runner.hermit.HermiTTestRunner");    
+        Harness.main(new String[] {"http://wiki.webont.org/exports/all.rdf"});
+    }
+    
 }

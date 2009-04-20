@@ -54,10 +54,13 @@ public abstract class AbstractEntailmentTest extends AbstractPremisedTest {
 				? f.getConclusionOWLDataProperty()
 				: f.getNonConclusionOWLDataProperty() );
 			if( conclusions != null ) {
-				if( conclusions.size() != 1 )
-					throw new IllegalArgumentException( f.toString() );
-				conclusionOntologyLiteral.put( f, conclusions.iterator().next().getLiteral() );
-				conclusionFormats.add( f );
+				if( conclusions.size() != 1 ) {
+				    System.err.println("Error: " + f.toString());
+				    // throw new IllegalArgumentException( f.toString() );
+				} else {				
+				    conclusionOntologyLiteral.put( f, conclusions.iterator().next().getLiteral() );
+				    conclusionFormats.add( f );
+				}
 			}
 		}
 	}
