@@ -1,6 +1,8 @@
 package com.clarkparsia.owlwg;
 
-import java.io.File;
+import static com.clarkparsia.owlwg.Constants.RESULTS_ONTOLOGY_PHYSICAL_URI;
+import static com.clarkparsia.owlwg.Constants.TEST_ONTOLOGY_PHYSICAL_URI;
+
 import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.util.Collections;
@@ -47,18 +49,10 @@ import com.clarkparsia.owlwg.testrun.TestRunResultAdapter;
 public class Harness {
 
 	public static final Logger	log;
-	public static final URI		RESULTS_ONTOLOGY_PHYSICAL_URI;
-	public static final URI		TEST_ONTOLOGY_PHYSICAL_URI;
 	public static final String	TEST_RUNNER_CLASS_PROPERTY;
 
 	static {
 		log = Logger.getLogger( Harness.class.getCanonicalName() );
-
-		File f = new File( "ontologies/test-ontology.owl" );
-		TEST_ONTOLOGY_PHYSICAL_URI = f.toURI();
-
-		f = new File( "ontologies/results-ontology.owl" );
-		RESULTS_ONTOLOGY_PHYSICAL_URI = f.toURI();
 
 		TEST_RUNNER_CLASS_PROPERTY = "Harness.TestRunner";
 	}

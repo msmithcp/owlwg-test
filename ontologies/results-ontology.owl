@@ -16,7 +16,7 @@
 	xmlns:test="&test;"
 	xmlns:results="&results;">
 
-	<owl:Ontology rdf:about="http://www.w3.org/2007/OWL/resultsOntology">
+	<owl:Ontology rdf:about="http://www.w3.org/2007/OWL/testResultOntology">
 	  <owl:imports rdf:resource="http://www.w3.org/2007/OWL/testOntology"/>
 	  <rdfs:label>The OWL 2 Test Result Ontology</rdfs:label>
 	  <rdfs:comment>Adapted from http://www.w3.org/2002/03owlt/resultsOntology</rdfs:comment>
