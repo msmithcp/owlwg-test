@@ -22,6 +22,7 @@ import com.clarkparsia.owlwg.testcase.InconsistencyTest;
 import com.clarkparsia.owlwg.testcase.NegativeEntailmentTest;
 import com.clarkparsia.owlwg.testcase.PositiveEntailmentTest;
 import com.clarkparsia.owlwg.testcase.TestCase;
+import com.clarkparsia.owlwg.testcase.filter.FilterCondition;
 
 /**
  * <p>
@@ -46,6 +47,12 @@ public class TestCollection implements Iterable<TestCase> {
 	private final Map<OWLIndividual, TestCase>	cases;
 
 	public TestCollection(OWLOntology o) {
+		this( o, FilterCondition.ACCEPT_ALL );
+	}
+
+	public TestCollection(OWLOntology o, FilterCondition filter) {
+		if( filter == null )
+			throw new NullPointerException();
 
 		cases = new HashMap<OWLIndividual, TestCase>();
 		Set<OWLClassAssertionAxiom> axioms;
@@ -54,7 +61,9 @@ public class TestCollection implements Iterable<TestCase> {
 		if( axioms != null ) {
 			for( OWLClassAssertionAxiom ax : axioms ) {
 				final OWLIndividual i = ax.getIndividual();
-				cases.put( i, new PositiveEntailmentTest( o, i ) );
+				final PositiveEntailmentTest t = new PositiveEntailmentTest( o, i );
+				if( filter.accepts( t ) )
+					cases.put( i, t );
 			}
 		}
 
@@ -62,7 +71,9 @@ public class TestCollection implements Iterable<TestCase> {
 		if( axioms != null ) {
 			for( OWLClassAssertionAxiom ax : axioms ) {
 				final OWLIndividual i = ax.getIndividual();
-				cases.put( i, new NegativeEntailmentTest( o, i ) );
+				final NegativeEntailmentTest t = new NegativeEntailmentTest( o, i );
+				if( filter.accepts( t ) )
+					cases.put( i, t );
 			}
 		}
 
@@ -86,7 +97,9 @@ public class TestCollection implements Iterable<TestCase> {
 		if( axioms != null ) {
 			for( OWLClassAssertionAxiom ax : axioms ) {
 				final OWLIndividual i = ax.getIndividual();
-				cases.put( i, new InconsistencyTest( o, i ) );
+				final InconsistencyTest t = new InconsistencyTest( o, i );
+				if( filter.accepts( t ) )
+					cases.put( i, t );
 			}
 		}
 	}
