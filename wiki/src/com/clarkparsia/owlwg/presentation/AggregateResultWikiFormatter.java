@@ -1,5 +1,8 @@
 package com.clarkparsia.owlwg.presentation;
 
+import static com.clarkparsia.owlwg.Constants.RESULTS_ONTOLOGY_PHYSICAL_URI;
+import static com.clarkparsia.owlwg.Constants.TEST_ONTOLOGY_PHYSICAL_URI;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,7 +17,6 @@ import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyCreationException;
 import org.semanticweb.owl.model.OWLOntologyManager;
 
-import com.clarkparsia.owlwg.Harness;
 import com.clarkparsia.owlwg.TestCollection;
 import com.clarkparsia.owlwg.testcase.TestCase;
 import com.clarkparsia.owlwg.testrun.TestRunResult;
@@ -61,8 +63,8 @@ public class AggregateResultWikiFormatter {
 			 * reading the test cases, otherwise import of them is likely to
 			 * fail.
 			 */
-			manager.loadOntologyFromPhysicalURI( Harness.TEST_ONTOLOGY_PHYSICAL_URI );
-			manager.loadOntologyFromPhysicalURI( Harness.RESULTS_ONTOLOGY_PHYSICAL_URI );
+			manager.loadOntologyFromPhysicalURI( TEST_ONTOLOGY_PHYSICAL_URI );
+			manager.loadOntologyFromPhysicalURI( RESULTS_ONTOLOGY_PHYSICAL_URI );
 
 			OWLOntology casesOntology = manager.loadOntologyFromPhysicalURI( URI.create( args[0] ) );
 			List<OWLOntology> resultsOntologies = new ArrayList<OWLOntology>();
