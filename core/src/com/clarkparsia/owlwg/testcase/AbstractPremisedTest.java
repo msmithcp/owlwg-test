@@ -1,10 +1,13 @@
 package com.clarkparsia.owlwg.testcase;
 
+import static java.lang.String.format;
+
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.semanticweb.owl.io.StringInputSource;
 import org.semanticweb.owl.model.OWLConstant;
@@ -33,8 +36,13 @@ import org.semanticweb.owl.model.OWLOntologyCreationException;
  */
 public abstract class AbstractPremisedTest extends AbstractBaseTestCase {
 
-	private final EnumMap<SerializationFormat, OWLOntology>	premiseOntology;
+	private static final Logger								log;
+	static {
+		log = Logger.getLogger( AbstractPremisedTest.class.getCanonicalName() );
+	}
+
 	private final EnumSet<SerializationFormat>				premiseFormats;
+	private final EnumMap<SerializationFormat, OWLOntology>	premiseOntology;
 	private final EnumMap<SerializationFormat, String>		premiseOntologyLiteral;
 
 	public AbstractPremisedTest(OWLOntology ontology, OWLIndividual i) {
@@ -51,12 +59,20 @@ public abstract class AbstractPremisedTest extends AbstractBaseTestCase {
 		for( SerializationFormat f : SerializationFormat.values() ) {
 			Set<OWLConstant> premises = values.get( f.getPremiseOWLDataProperty() );
 			if( premises != null ) {
-				if( premises.size() != 1 )
-					throw new IllegalArgumentException( f.toString() );
+				if( premises.size() > 1 ) {
+					log
+							.warning( format(
+									"Multiple premise ontologies found for testcase (%s) with serialization format (%s).  Choosing arbitrarily.",
+									getIdentifier(), f ) );
+				}
 				premiseOntologyLiteral.put( f, premises.iterator().next().getLiteral() );
 				premiseFormats.add( f );
 			}
 		}
+	}
+
+	public Set<SerializationFormat> getPremiseFormats() {
+		return Collections.unmodifiableSet( premiseFormats );
 	}
 
 	public String getPremiseOntology(SerializationFormat format) {
@@ -76,9 +92,5 @@ public abstract class AbstractPremisedTest extends AbstractBaseTestCase {
 			premiseOntology.put( format, o );
 		}
 		return o;
-	}
-
-	public Set<SerializationFormat> getPremiseFormats() {
-		return Collections.unmodifiableSet( premiseFormats );
 	}
 }

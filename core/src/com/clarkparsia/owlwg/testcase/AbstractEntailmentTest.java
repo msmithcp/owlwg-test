@@ -1,10 +1,13 @@
 package com.clarkparsia.owlwg.testcase;
 
+import static java.lang.String.format;
+
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.semanticweb.owl.io.StringInputSource;
 import org.semanticweb.owl.model.OWLConstant;
@@ -33,6 +36,12 @@ import org.semanticweb.owl.model.OWLOntologyCreationException;
  */
 public abstract class AbstractEntailmentTest extends AbstractPremisedTest {
 
+	private static final Logger								log;
+
+	static {
+		log = Logger.getLogger( AbstractEntailmentTest.class.getCanonicalName() );
+	}
+
 	private final EnumSet<SerializationFormat>				conclusionFormats;
 	private final EnumMap<SerializationFormat, OWLOntology>	conclusionOntology;
 	private final EnumMap<SerializationFormat, String>		conclusionOntologyLiteral;
@@ -54,8 +63,12 @@ public abstract class AbstractEntailmentTest extends AbstractPremisedTest {
 				? f.getConclusionOWLDataProperty()
 				: f.getNonConclusionOWLDataProperty() );
 			if( conclusions != null ) {
-				if( conclusions.size() != 1 )
-					throw new IllegalArgumentException( f.toString() );
+				if( conclusions.size() > 1 ) {
+					log
+							.warning( format(
+									"Multiple conclusion ontologies found for testcase (%s) with serialization format (%s).  Choosing arbitrarily.",
+									getIdentifier(), f ) );
+				}
 				conclusionOntologyLiteral.put( f, conclusions.iterator().next().getLiteral() );
 				conclusionFormats.add( f );
 			}
