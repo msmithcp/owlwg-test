@@ -2,16 +2,24 @@ package com.clarkparsia.owlwg;
 
 import static com.clarkparsia.owlwg.Constants.RESULTS_ONTOLOGY_PHYSICAL_URI;
 import static com.clarkparsia.owlwg.Constants.TEST_ONTOLOGY_PHYSICAL_URI;
+import static java.lang.String.format;
 
 import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.coode.owl.rdf.turtle.TurtleRenderer;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLAxiom;
@@ -23,7 +31,16 @@ import org.semanticweb.owl.model.OWLOntologyManager;
 
 import com.clarkparsia.owlwg.runner.TestRunner;
 import com.clarkparsia.owlwg.runner.pellet.PelletTestRunner;
+import com.clarkparsia.owlwg.testcase.Semantics;
+import com.clarkparsia.owlwg.testcase.Status;
+import com.clarkparsia.owlwg.testcase.SyntaxConstraint;
 import com.clarkparsia.owlwg.testcase.TestCase;
+import com.clarkparsia.owlwg.testcase.filter.ConjunctionFilter;
+import com.clarkparsia.owlwg.testcase.filter.DisjunctionFilter;
+import com.clarkparsia.owlwg.testcase.filter.FilterCondition;
+import com.clarkparsia.owlwg.testcase.filter.SatisfiedSyntaxConstraintFilter;
+import com.clarkparsia.owlwg.testcase.filter.SemanticsFilter;
+import com.clarkparsia.owlwg.testcase.filter.StatusFilter;
 import com.clarkparsia.owlwg.testrun.ResultVocabulary;
 import com.clarkparsia.owlwg.testrun.TestRunResult;
 import com.clarkparsia.owlwg.testrun.TestRunResultAdapter;
@@ -73,9 +90,8 @@ public class Harness {
 				log.log( Level.SEVERE, "Test runner class not found: " + clsName, e );
 				return null;
 			} catch( ClassCastException e ) {
-				log.log( Level.SEVERE, String.format(
-						"Test runner class (%s) does not implement %s", clsName, TestRunner.class
-								.getCanonicalName() ), e );
+				log.log( Level.SEVERE, format( "Test runner class (%s) does not implement %s",
+						clsName, TestRunner.class.getCanonicalName() ), e );
 				return null;
 			} catch( InstantiationException e ) {
 				log.log( Level.SEVERE, "Instantiation failed for test runner class: " + clsName, e );
@@ -94,8 +110,35 @@ public class Harness {
 
 	public static void main(String[] args) {
 
-		if( args.length != 1 )
-			throw new IllegalArgumentException();
+		Options options = new Options();
+		Option o = new Option( "f", "filter", true,
+				"Specifies a filter that tests must match to be run" );
+		o.setArgName( "FILTER_STACK" );
+		options.addOption( o );
+
+		FilterCondition filter;
+		URI testFileUri;
+		try {
+			CommandLineParser parser = new GnuParser();
+			CommandLine line = parser.parse( options, args );
+
+			String filterString = line.getOptionValue( "filter" );
+			filter = (filterString == null)
+				? FilterCondition.ACCEPT_ALL
+				: parseFilterCondition( filterString );
+
+			String[] remaining = line.getArgs();
+			if( remaining.length != 1 )
+				throw new IllegalArgumentException();
+
+			testFileUri = URI.create( remaining[0] );
+		} catch( ParseException e ) {
+			log.log( Level.SEVERE, "Command line parsing failed.", e );
+			return;
+		} catch( IllegalArgumentException e ) {
+			log.log( Level.SEVERE, "Command line parsing failed.", e );
+			return;
+		}
 
 		final OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 
@@ -114,10 +157,10 @@ public class Harness {
 			manager.loadOntologyFromPhysicalURI( TEST_ONTOLOGY_PHYSICAL_URI );
 			manager.loadOntologyFromPhysicalURI( RESULTS_ONTOLOGY_PHYSICAL_URI );
 
-			OWLOntology casesOntology = manager.loadOntologyFromPhysicalURI( URI.create( args[0] ) );
+			OWLOntology casesOntology = manager.loadOntologyFromPhysicalURI( testFileUri );
 			OWLOntology resultOntology = manager.createOntology( noAxioms );
 
-			TestCollection cases = new TestCollection( casesOntology );
+			TestCollection cases = new TestCollection( casesOntology, filter );
 			Iterator<TestCase> it = cases.asList().iterator();
 			cases = null;
 
@@ -153,5 +196,62 @@ public class Harness {
 		} catch( OWLOntologyChangeException e ) {
 			log.log( Level.SEVERE, "Ontology change exception caught.", e );
 		}
+	}
+
+	private static FilterCondition parseFilterCondition(String filterString) {
+		FilterCondition filter;
+		LinkedList<FilterCondition> filterStack = new LinkedList<FilterCondition>();
+		String[] splits = filterString.split( "\\s" );
+		for( int i = 0; i < splits.length; i++ ) {
+			if( splits[i].equalsIgnoreCase( "and" ) ) {
+				FilterCondition a = filterStack.removeLast();
+				FilterCondition b = filterStack.removeLast();
+				filterStack.add( new ConjunctionFilter( a, b ) );
+			}
+			else if( splits[i].equalsIgnoreCase( "approved" ) ) {
+				filterStack.add( new StatusFilter( Status.APPROVED ) );
+			}
+			else if( splits[i].equalsIgnoreCase( "direct" ) ) {
+				filterStack.add( new SemanticsFilter( Semantics.DIRECT ) );
+			}
+			else if( splits[i].equalsIgnoreCase( "dl" ) ) {
+				filterStack.add( new SatisfiedSyntaxConstraintFilter( SyntaxConstraint.DL ) );
+			}
+			else if( splits[i].equalsIgnoreCase( "or" ) ) {
+				FilterCondition a = filterStack.removeLast();
+				FilterCondition b = filterStack.removeLast();
+				filterStack.add( new DisjunctionFilter( a, b ) );
+			}
+			else if( splits[i].equalsIgnoreCase( "proposed" ) ) {
+				filterStack.add( new StatusFilter( Status.PROPOSED ) );
+			}
+			else if( splits[i].equalsIgnoreCase( "rdf" ) ) {
+				filterStack.add( new SemanticsFilter( Semantics.RDF ) );
+			}
+			else {
+				final String msg = format( "Unexpected filter condition argument: \"%s\"",
+						splits[i] );
+				log.severe( msg );
+				throw new IllegalArgumentException( msg );
+			}
+		}
+		if( filterStack.isEmpty() ) {
+			final String msg = format(
+					"Missing valid filter condition. Filter option argument: \"%s\"", filterString );
+			log.severe( msg );
+			throw new IllegalArgumentException( msg );
+		}
+		if( filterStack.size() > 1 ) {
+			final String msg = format(
+					"Filter conditions do not parse to a single condition. Final parse stack: \"%s\"",
+					filterStack );
+			log.severe( msg );
+			throw new IllegalArgumentException( msg );
+		}
+
+		filter = filterStack.iterator().next();
+		if( log.isLoggable( Level.FINE ) )
+			log.fine( format( "Filter condition: \"%s\"", filter ) );
+		return filter;
 	}
 }
