@@ -31,6 +31,8 @@ public interface TestRunResult {
 	public RunResultType getResultType();
 
 	public TestCase getTestCase();
-
+	
 	public TestRunner getTestRunner();
+
+	public RunTestType getTestType();
 }

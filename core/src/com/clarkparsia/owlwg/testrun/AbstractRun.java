@@ -24,20 +24,25 @@ import com.clarkparsia.owlwg.testcase.TestCase;
 public abstract class AbstractRun implements TestRunResult {
 
 	private final String		details;
+	private final RunResultType	resultType;
 	private final TestRunner	runner;
 	private final TestCase		testcase;
-	private final RunResultType	type;
+	private final RunTestType	testType;
 
-	public AbstractRun(TestCase testcase, RunResultType type, TestRunner runner, String details) {
+	public AbstractRun(TestCase testcase, RunResultType resultType, RunTestType testType,
+			TestRunner runner, String details) {
 		if( testcase == null )
 			throw new NullPointerException();
-		if( type == null )
+		if( resultType == null )
+			throw new NullPointerException();
+		if( testType == null )
 			throw new NullPointerException();
 		if( runner == null )
 			throw new NullPointerException();
 
 		this.testcase = testcase;
-		this.type = type;
+		this.resultType = resultType;
+		this.testType = testType;
 		this.runner = runner;
 		this.details = details;
 	}
@@ -47,7 +52,7 @@ public abstract class AbstractRun implements TestRunResult {
 	}
 
 	public RunResultType getResultType() {
-		return type;
+		return resultType;
 	}
 
 	public TestCase getTestCase() {
@@ -56,6 +61,10 @@ public abstract class AbstractRun implements TestRunResult {
 
 	public TestRunner getTestRunner() {
 		return runner;
+	}
+
+	public RunTestType getTestType() {
+		return testType;
 	}
 
 }

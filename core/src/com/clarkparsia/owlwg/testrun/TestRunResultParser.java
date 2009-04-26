@@ -2,11 +2,20 @@ package com.clarkparsia.owlwg.testrun;
 
 import static com.clarkparsia.owlwg.testcase.TestVocabulary.DatatypeProperty.IDENTIFIER;
 import static com.clarkparsia.owlwg.testrun.ResultVocabulary.AnnotationProperty.DETAILS;
-import static com.clarkparsia.owlwg.testrun.ResultVocabulary.Class.PROFILE_IDENTIFICATION_RUN;
+import static com.clarkparsia.owlwg.testrun.ResultVocabulary.Class.CONSISTENCY_RUN;
+import static com.clarkparsia.owlwg.testrun.ResultVocabulary.Class.INCONSISTENCY_RUN;
+import static com.clarkparsia.owlwg.testrun.ResultVocabulary.Class.NEGATIVE_ENTAILMENT_RUN;
+import static com.clarkparsia.owlwg.testrun.ResultVocabulary.Class.POSITIVE_ENTAILMENT_RUN;
+import static com.clarkparsia.owlwg.testrun.ResultVocabulary.Class.SYNTAX_CONSTRAINT_RUN;
 import static com.clarkparsia.owlwg.testrun.ResultVocabulary.Class.SYNTAX_TRANSLATION_RUN;
 import static com.clarkparsia.owlwg.testrun.ResultVocabulary.Class.TEST_RUN;
 import static com.clarkparsia.owlwg.testrun.ResultVocabulary.ObjectProperty.RUNNER;
+import static com.clarkparsia.owlwg.testrun.ResultVocabulary.ObjectProperty.SYNTAX_CONSTRAINT;
 import static com.clarkparsia.owlwg.testrun.ResultVocabulary.ObjectProperty.TEST;
+import static com.clarkparsia.owlwg.testrun.RunTestType.CONSISTENCY;
+import static com.clarkparsia.owlwg.testrun.RunTestType.INCONSISTENCY;
+import static com.clarkparsia.owlwg.testrun.RunTestType.NEGATIVE_ENTAILMENT;
+import static com.clarkparsia.owlwg.testrun.RunTestType.POSITIVE_ENTAILMENT;
 import static java.lang.String.format;
 
 import java.net.URI;
@@ -28,6 +37,7 @@ import org.semanticweb.owl.model.OWLObjectPropertyExpression;
 import org.semanticweb.owl.model.OWLOntology;
 
 import com.clarkparsia.owlwg.runner.TestRunner;
+import com.clarkparsia.owlwg.testcase.SyntaxConstraint;
 import com.clarkparsia.owlwg.testcase.TestCase;
 
 /**
@@ -188,24 +198,53 @@ public class TestRunResultParser {
 					? new SyntaxTranslationRun( testCase, resultType, runner )
 					: new SyntaxTranslationRun( testCase, resultType, runner, details );
 			}
-			else if( types.contains( PROFILE_IDENTIFICATION_RUN.getOWLClass() ) ) {
-				result = (details == null)
-					? new ProfileIdentificationRun( testCase, resultType, runner )
-					: new ProfileIdentificationRun( testCase, resultType, runner, details );
-			}
-			else {
-				for( ReasoningRunType t : ReasoningRunType.values() ) {
-					if( types.contains( t.getOWLClass() ) )
-						result = (details == null)
-							? new ReasoningRun( testCase, t, resultType, runner )
-							: new ReasoningRun( testCase, t, resultType, runner, details );
-				}
-				if( result == null ) {
-					log.warning( format(
-							"Skipping result, missing recognizable run type (\"%s\",%s)", i
-									.getURI(), types ) );
+			else if( types.contains( SYNTAX_CONSTRAINT_RUN.getOWLClass() ) ) {
+				Set<OWLIndividual> constraints = oValues.get( SYNTAX_CONSTRAINT
+						.getOWLObjectProperty() );
+				SyntaxConstraint constraint = null;
+				if( constraints.size() != 1 ) {
+					log
+							.warning( format(
+									"Skipping result, missing or more than one syntax constraint assertion (\"%s\",%s)",
+									i.getURI(), constraints ) );
 					continue;
 				}
+				OWLIndividual ind = constraints.iterator().next();
+				for( SyntaxConstraint c : SyntaxConstraint.values() ) {
+					if( c.getOWLIndividual().equals( ind ) ) {
+						constraint = c;
+						break;
+					}
+				}
+				if( constraint == null ) {
+					log.warning( format(
+							"Skipping result, unknown syntax constraint assertion (\"%s\",%s)", i
+									.getURI(), ind ) );
+					continue;
+				}
+				result = (details == null)
+					? new SyntaxConstraintRun( testCase, resultType, constraint, runner )
+					: new SyntaxConstraintRun( testCase, resultType, constraint, runner, details );
+			}
+			else if( types.contains( CONSISTENCY_RUN.getOWLClass() ) ) {
+				result = (details == null)
+					? new ReasoningRun( testCase, resultType, CONSISTENCY, runner )
+					: new ReasoningRun( testCase, resultType, CONSISTENCY, runner, details );
+			}
+			else if( types.contains( INCONSISTENCY_RUN.getOWLClass() ) ) {
+				result = (details == null)
+					? new ReasoningRun( testCase, resultType, INCONSISTENCY, runner )
+					: new ReasoningRun( testCase, resultType, INCONSISTENCY, runner, details );
+			}
+			else if( types.contains( NEGATIVE_ENTAILMENT_RUN.getOWLClass() ) ) {
+				result = (details == null)
+					? new ReasoningRun( testCase, resultType, NEGATIVE_ENTAILMENT, runner )
+					: new ReasoningRun( testCase, resultType, NEGATIVE_ENTAILMENT, runner, details );
+			}
+			else if( types.contains( POSITIVE_ENTAILMENT_RUN.getOWLClass() ) ) {
+				result = (details == null)
+					? new ReasoningRun( testCase, resultType, POSITIVE_ENTAILMENT, runner )
+					: new ReasoningRun( testCase, resultType, POSITIVE_ENTAILMENT, runner, details );
 			}
 
 			results.add( result );

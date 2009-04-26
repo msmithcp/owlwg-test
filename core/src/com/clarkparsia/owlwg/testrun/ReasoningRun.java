@@ -1,5 +1,12 @@
 package com.clarkparsia.owlwg.testrun;
 
+import static com.clarkparsia.owlwg.testrun.RunTestType.CONSISTENCY;
+import static com.clarkparsia.owlwg.testrun.RunTestType.INCONSISTENCY;
+import static com.clarkparsia.owlwg.testrun.RunTestType.NEGATIVE_ENTAILMENT;
+import static com.clarkparsia.owlwg.testrun.RunTestType.POSITIVE_ENTAILMENT;
+
+import java.util.EnumSet;
+
 import com.clarkparsia.owlwg.runner.TestRunner;
 import com.clarkparsia.owlwg.testcase.TestCase;
 
@@ -22,25 +29,21 @@ import com.clarkparsia.owlwg.testcase.TestCase;
  */
 public class ReasoningRun extends AbstractRun {
 
-	private final ReasoningRunType	type;
-
-	public ReasoningRun(TestCase testcase, ReasoningRunType semanticType, RunResultType resultType,
+	public ReasoningRun(TestCase testcase, RunResultType resultType, RunTestType testType,
 			TestRunner runner) {
-		this( testcase, semanticType, resultType, runner, null );
+		this( testcase, resultType, testType, runner, null );
 	}
 
-	public ReasoningRun(TestCase testcase, ReasoningRunType semanticType, RunResultType resultType,
+	public ReasoningRun(TestCase testcase, RunResultType resultType, RunTestType testType,
 			TestRunner runner, String details) {
-		super( testcase, resultType, runner, details );
-		this.type = semanticType;
+		super( testcase, resultType, testType, runner, details );
+		if( !EnumSet.of( CONSISTENCY, INCONSISTENCY, NEGATIVE_ENTAILMENT, POSITIVE_ENTAILMENT )
+				.contains( testType ) )
+			throw new IllegalArgumentException();
 	}
 
 	public void accept(TestRunResultVisitor visitor) {
 		visitor.visit( this );
-	}
-
-	public ReasoningRunType getSemanticRunType() {
-		return type;
 	}
 
 	@Override
@@ -48,9 +51,9 @@ public class ReasoningRun extends AbstractRun {
 		String details = getDetails();
 		if( details == null )
 			return String.format( "Result( %s , %s, %s)", getTestCase(), getResultType(),
-					getSemanticRunType() );
+					getTestType() );
 		else
 			return String.format( "Result( %s , %s, %s (%s))", getTestCase(), getResultType(),
-					getSemanticRunType(), details );
+					getTestType(), details );
 	}
 }

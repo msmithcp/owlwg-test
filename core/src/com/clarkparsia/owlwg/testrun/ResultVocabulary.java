@@ -48,7 +48,7 @@ public class ResultVocabulary {
 		INCOMPLETE_RUN("IncompleteRun"), INCONSISTENCY_RUN("InconsistencyRun"),
 		NEGATIVE_ENTAILMENT_RUN("NegativeEntailmentRun"), PASSING_RUN("PassingRun"),
 		POSITIVE_ENTAILMENT_RUN("PositiveEntailmentRun"),
-		PROFILE_IDENTIFICATION_RUN("ProfileIdentificationRun"),
+		SYNTAX_CONSTRAINT_RUN("SyntaxConstraintRun"),
 		SYNTAX_TRANSLATION_RUN("SyntaxTranslationRun"), TEST_RUN("TestRun");
 
 		private final OWLClass	cls;
@@ -62,22 +62,8 @@ public class ResultVocabulary {
 		}
 	}
 
-	public enum Individual {
-		DL("DL"), EL("EL"), QL("QL"), RL("RL");
-
-		private final OWLIndividual	i;
-
-		private Individual(String localName) {
-			i = manager.getOWLDataFactory().getOWLIndividual( URI.create( URI_BASE + localName ) );
-		}
-
-		public OWLIndividual getOWLIndividual() {
-			return i;
-		}
-	}
-
 	public enum ObjectProperty {
-		RUNNER("runner"), TEST("test");
+		SYNTAX_CONSTRAINT("syntaxConstraint"), RUNNER("runner"), TEST("test");
 
 		private final OWLObjectProperty	op;
 

@@ -1,13 +1,13 @@
 package com.clarkparsia.owlwg.runner;
 
 import static com.clarkparsia.owlwg.testcase.SerializationFormat.RDFXML;
-import static com.clarkparsia.owlwg.testrun.ReasoningRunType.CONSISTENCY;
-import static com.clarkparsia.owlwg.testrun.ReasoningRunType.INCONSISTENCY;
-import static com.clarkparsia.owlwg.testrun.ReasoningRunType.NEGATIVE_ENTAILMENT;
-import static com.clarkparsia.owlwg.testrun.ReasoningRunType.POSITIVE_ENTAILMENT;
 import static com.clarkparsia.owlwg.testrun.RunResultType.FAILING;
 import static com.clarkparsia.owlwg.testrun.RunResultType.INCOMPLETE;
 import static com.clarkparsia.owlwg.testrun.RunResultType.PASSING;
+import static com.clarkparsia.owlwg.testrun.RunTestType.CONSISTENCY;
+import static com.clarkparsia.owlwg.testrun.RunTestType.INCONSISTENCY;
+import static com.clarkparsia.owlwg.testrun.RunTestType.NEGATIVE_ENTAILMENT;
+import static com.clarkparsia.owlwg.testrun.RunTestType.POSITIVE_ENTAILMENT;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -28,7 +28,7 @@ import com.clarkparsia.owlwg.testcase.PositiveEntailmentTest;
 import com.clarkparsia.owlwg.testcase.TestCase;
 import com.clarkparsia.owlwg.testcase.TestCaseVisitor;
 import com.clarkparsia.owlwg.testrun.ReasoningRun;
-import com.clarkparsia.owlwg.testrun.ReasoningRunType;
+import com.clarkparsia.owlwg.testrun.RunTestType;
 import com.clarkparsia.owlwg.testrun.TestRunResult;
 
 /**
@@ -55,13 +55,17 @@ public abstract class AbstractTestRunner implements TestRunner {
 
 	protected abstract class AbstractTestAsRunnable<T extends TestCase> implements TestAsRunnable {
 
-		protected TestRunResult				result;
-		protected final T					testcase;
-		protected Throwable					throwable;
-		protected final ReasoningRunType	type;
+		protected TestRunResult		result;
+		protected final T			testcase;
+		protected Throwable			throwable;
+		protected final RunTestType	type;
 
-		public AbstractTestAsRunnable(T testcase, ReasoningRunType type) {
+		public AbstractTestAsRunnable(T testcase, RunTestType type) {
 			this.testcase = testcase;
+
+			if( !EnumSet.of( CONSISTENCY, INCONSISTENCY, NEGATIVE_ENTAILMENT, POSITIVE_ENTAILMENT )
+					.contains( type ) )
+				throw new IllegalArgumentException();
 
 			this.type = type;
 			result = null;
@@ -69,7 +73,7 @@ public abstract class AbstractTestRunner implements TestRunner {
 		}
 
 		public TestRunResult getErrorResult(Throwable th) {
-			return new ReasoningRun( testcase, type, INCOMPLETE, AbstractTestRunner.this, th
+			return new ReasoningRun( testcase, INCOMPLETE, type, AbstractTestRunner.this, th
 					.getMessage() );
 		}
 
@@ -83,7 +87,7 @@ public abstract class AbstractTestRunner implements TestRunner {
 		}
 
 		public TestRunResult getTimeoutResult() {
-			return new ReasoningRun( testcase, type, INCOMPLETE, AbstractTestRunner.this, String
+			return new ReasoningRun( testcase, INCOMPLETE, type, AbstractTestRunner.this, String
 					.format( "Timeout: %s ms", timeout ) );
 		}
 	}
@@ -131,7 +135,7 @@ public abstract class AbstractTestRunner implements TestRunner {
 
 	protected class XConsistencyTest extends AbstractTestAsRunnable<AbstractPremisedTest> {
 
-		public XConsistencyTest(AbstractPremisedTest testcase, ReasoningRunType type) {
+		public XConsistencyTest(AbstractPremisedTest testcase, RunTestType type) {
 			super( testcase, type );
 
 			if( !EnumSet.of( CONSISTENCY, INCONSISTENCY ).contains( type ) )
@@ -140,14 +144,14 @@ public abstract class AbstractTestRunner implements TestRunner {
 
 		public void run() {
 			if( !testcase.getPremiseFormats().contains( RDFXML ) )
-				result = new ReasoningRun( testcase, type, INCOMPLETE, AbstractTestRunner.this,
+				result = new ReasoningRun( testcase, INCOMPLETE, type, AbstractTestRunner.this,
 						"Only RDF/XML input ontology parsing supported." );
 
 			OWLOntology o;
 			try {
 				o = testcase.parsePremiseOntology( RDFXML );
 			} catch( OWLOntologyCreationException e ) {
-				result = new ReasoningRun( testcase, type, INCOMPLETE, AbstractTestRunner.this,
+				result = new ReasoningRun( testcase, INCOMPLETE, type, AbstractTestRunner.this,
 						"Exception parsing premise ontology: " + e.getLocalizedMessage() );
 				return;
 			}
@@ -155,15 +159,15 @@ public abstract class AbstractTestRunner implements TestRunner {
 			try {
 				final boolean consistent = isConsistent( testcase.getOWLOntologyManager(), o );
 				if( consistent )
-					result = new ReasoningRun( testcase, type, CONSISTENCY.equals( type )
+					result = new ReasoningRun( testcase, CONSISTENCY.equals( type )
 						? PASSING
-						: FAILING, AbstractTestRunner.this );
+						: FAILING, type, AbstractTestRunner.this );
 				else
-					result = new ReasoningRun( testcase, type, INCONSISTENCY.equals( type )
+					result = new ReasoningRun( testcase, INCONSISTENCY.equals( type )
 						? PASSING
-						: FAILING, AbstractTestRunner.this );
+						: FAILING, type, AbstractTestRunner.this );
 			} catch( Throwable th ) {
-				result = new ReasoningRun( testcase, type, INCOMPLETE, AbstractTestRunner.this,
+				result = new ReasoningRun( testcase, INCOMPLETE, type, AbstractTestRunner.this,
 						"Caught throwable: " + th.getLocalizedMessage() );
 			}
 		}
@@ -172,7 +176,7 @@ public abstract class AbstractTestRunner implements TestRunner {
 
 	protected class XEntailmentTest extends AbstractTestAsRunnable<AbstractEntailmentTest> {
 
-		public XEntailmentTest(AbstractEntailmentTest testcase, ReasoningRunType type) {
+		public XEntailmentTest(AbstractEntailmentTest testcase, RunTestType type) {
 			super( testcase, type );
 
 			if( !EnumSet.of( POSITIVE_ENTAILMENT, NEGATIVE_ENTAILMENT ).contains( type ) )
@@ -181,10 +185,10 @@ public abstract class AbstractTestRunner implements TestRunner {
 
 		public void run() {
 			if( !testcase.getPremiseFormats().contains( RDFXML ) )
-				result = new ReasoningRun( testcase, type, INCOMPLETE, AbstractTestRunner.this,
+				result = new ReasoningRun( testcase, INCOMPLETE, type, AbstractTestRunner.this,
 						"Only RDF/XML input ontology parsing supported." );
 			if( !testcase.getConclusionFormats().contains( RDFXML ) )
-				result = new ReasoningRun( testcase, type, INCOMPLETE, AbstractTestRunner.this,
+				result = new ReasoningRun( testcase, INCOMPLETE, type, AbstractTestRunner.this,
 						"Only RDF/XML input ontology parsing supported." );
 
 			OWLOntology premise, conclusion;
@@ -192,7 +196,7 @@ public abstract class AbstractTestRunner implements TestRunner {
 				premise = testcase.parsePremiseOntology( RDFXML );
 				conclusion = testcase.parseConclusionOntology( RDFXML );
 			} catch( OWLOntologyCreationException e ) {
-				result = new ReasoningRun( testcase, type, INCOMPLETE, AbstractTestRunner.this,
+				result = new ReasoningRun( testcase, INCOMPLETE, type, AbstractTestRunner.this,
 						"Exception parsing input ontology: " + e.getLocalizedMessage() );
 				return;
 			}
@@ -201,15 +205,15 @@ public abstract class AbstractTestRunner implements TestRunner {
 				boolean entailed = isEntailed( testcase.getOWLOntologyManager(), premise,
 						conclusion );
 				if( entailed )
-					result = new ReasoningRun( testcase, type, POSITIVE_ENTAILMENT.equals( type )
+					result = new ReasoningRun( testcase, POSITIVE_ENTAILMENT.equals( type )
 						? PASSING
-						: FAILING, AbstractTestRunner.this );
+						: FAILING, type, AbstractTestRunner.this );
 				else
-					result = new ReasoningRun( testcase, type, NEGATIVE_ENTAILMENT.equals( type )
+					result = new ReasoningRun( testcase, NEGATIVE_ENTAILMENT.equals( type )
 						? PASSING
-						: FAILING, AbstractTestRunner.this );
+						: FAILING, type, AbstractTestRunner.this );
 			} catch( Throwable th ) {
-				result = new ReasoningRun( testcase, type, INCOMPLETE, AbstractTestRunner.this,
+				result = new ReasoningRun( testcase, INCOMPLETE, type, AbstractTestRunner.this,
 						"Caught throwable: " + th.getLocalizedMessage() );
 			}
 		}

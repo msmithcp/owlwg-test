@@ -1,8 +1,7 @@
 package com.clarkparsia.owlwg.testrun;
 
-import static com.clarkparsia.owlwg.testrun.ResultVocabulary.Class.PROFILE_IDENTIFICATION_RUN;
-import static com.clarkparsia.owlwg.testrun.ResultVocabulary.Class.SYNTAX_TRANSLATION_RUN;
 import static com.clarkparsia.owlwg.testrun.ResultVocabulary.Class.TEST_RUN;
+import static com.clarkparsia.owlwg.testrun.ResultVocabulary.ObjectProperty.SYNTAX_CONSTRAINT;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -46,19 +45,22 @@ public class TestRunResultAdapter {
 			return axioms;
 		}
 
-		public void visit(ProfileIdentificationRun result) {
-			axioms.add( dataFactory.getOWLClassAssertionAxiom( currentIndividual,
-					PROFILE_IDENTIFICATION_RUN.getOWLClass() ) );
+		public void visit(SyntaxConstraintRun result) {
+			axioms.add( dataFactory.getOWLClassAssertionAxiom( currentIndividual, result
+					.getTestType().getOWLClass() ) );
+			axioms.add( dataFactory.getOWLObjectPropertyAssertionAxiom( currentIndividual,
+					SYNTAX_CONSTRAINT.getOWLObjectProperty(), result.getConstraint()
+							.getOWLIndividual() ) );
 		}
 
 		public void visit(ReasoningRun result) {
 			axioms.add( dataFactory.getOWLClassAssertionAxiom( currentIndividual, result
-					.getSemanticRunType().getOWLClass() ) );
+					.getTestType().getOWLClass() ) );
 		}
 
 		public void visit(SyntaxTranslationRun result) {
-			axioms.add( dataFactory.getOWLClassAssertionAxiom( currentIndividual,
-					SYNTAX_TRANSLATION_RUN.getOWLClass() ) );
+			axioms.add( dataFactory.getOWLClassAssertionAxiom( currentIndividual, result
+					.getTestType().getOWLClass() ) );
 		}
 
 	}

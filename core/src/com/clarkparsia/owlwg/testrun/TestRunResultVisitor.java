@@ -19,7 +19,7 @@ package com.clarkparsia.owlwg.testrun;
  */
 public interface TestRunResultVisitor {
 
-	public void visit(ProfileIdentificationRun result);
+	public void visit(SyntaxConstraintRun result);
 
 	public void visit(ReasoningRun result);
 

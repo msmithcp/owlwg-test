@@ -28,7 +28,7 @@ public class SyntaxTranslationRun extends AbstractRun {
 
 	public SyntaxTranslationRun(TestCase testcase, RunResultType type, TestRunner runner,
 			String details) {
-		super( testcase, type, runner, details );
+		super( testcase, type, RunTestType.SYNTAX_TRANSLATION, runner, details );
 	}
 
 	public void accept(TestRunResultVisitor visitor) {
