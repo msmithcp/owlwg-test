@@ -69,9 +69,16 @@ public class TestCollection implements Iterable<TestCase> {
 		axioms = o.getClassAssertionAxioms( CONSISTENCY_TEST.getOWLClass() );
 		if( axioms != null ) {
 			for( OWLClassAssertionAxiom ax : axioms ) {
-				OWLIndividual i = ax.getIndividual();
-				if( cases.get( i ) == null )
-					cases.put( i, new ConsistencyTest( o, i ) );
+				final OWLIndividual i = ax.getIndividual();
+				/*
+				 * Verify the identifier is not already in the map because both
+				 * entailment tests may also be marked as consistency tests.
+				 */
+				if( cases.containsKey( i ) )
+					continue;
+				final ConsistencyTest t = new ConsistencyTest( o, i );
+				if( filter.accepts( t ) && !cases.containsKey( i ) )
+					cases.put( i, t );
 			}
 		}
 
