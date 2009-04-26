@@ -4,7 +4,11 @@ import static com.clarkparsia.owlwg.Constants.RESULTS_ONTOLOGY_PHYSICAL_URI;
 import static com.clarkparsia.owlwg.Constants.TEST_ONTOLOGY_PHYSICAL_URI;
 import static java.lang.String.format;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.URI;
 import java.util.Collections;
 import java.util.HashSet;
@@ -20,6 +24,7 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.coode.owl.rdf.rdfxml.RDFXMLRenderer;
 import org.coode.owl.rdf.turtle.TurtleRenderer;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLAxiom;
@@ -115,9 +120,14 @@ public class Harness {
 				"Specifies a filter that tests must match to be run" );
 		o.setArgName( "FILTER_STACK" );
 		options.addOption( o );
+		o = new Option( "o", "output", true,
+				"Output file for test results (in TURTLE format).  Defaults to stdout." );
+		o.setArgName( "OUTPUT_FILE" );
+		options.addOption( o );
 
 		FilterCondition filter;
 		URI testFileUri;
+		Writer resultsWriter;
 		try {
 			CommandLineParser parser = new GnuParser();
 			CommandLine line = parser.parse( options, args );
@@ -127,6 +137,11 @@ public class Harness {
 				? FilterCondition.ACCEPT_ALL
 				: parseFilterCondition( filterString );
 
+			String outFilename = line.getOptionValue( "output" );
+			resultsWriter = (outFilename == null)
+				? new OutputStreamWriter( System.out )
+				: new OutputStreamWriter( new FileOutputStream( new File( outFilename ) ) );
+
 			String[] remaining = line.getArgs();
 			if( remaining.length != 1 )
 				throw new IllegalArgumentException();
@@ -135,7 +150,11 @@ public class Harness {
 		} catch( ParseException e ) {
 			log.log( Level.SEVERE, "Command line parsing failed.", e );
 			return;
+		} catch( FileNotFoundException e ) {
+			log.log( Level.SEVERE, "File not found.", e );
+			return;
 		} catch( IllegalArgumentException e ) {
+
 			log.log( Level.SEVERE, "Command line parsing failed.", e );
 			return;
 		}
@@ -186,8 +205,7 @@ public class Harness {
 				it.remove();
 			}
 
-			TurtleRenderer renderer = new TurtleRenderer( resultOntology, manager,
-					new OutputStreamWriter( System.out ) );
+			TurtleRenderer renderer = new TurtleRenderer( resultOntology, manager, resultsWriter );
 
 			renderer.render();
 
