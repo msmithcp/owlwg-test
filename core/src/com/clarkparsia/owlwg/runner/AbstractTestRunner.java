@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.semanticweb.owl.inference.OWLReasonerException;
 import org.semanticweb.owl.model.OWLOntology;
@@ -52,6 +53,12 @@ import com.clarkparsia.owlwg.testrun.TestRunResult;
  * @author Mike Smith &lt;msmith@clarkparsia.com&gt;
  */
 public abstract class AbstractTestRunner implements TestRunner {
+
+	private static final Logger log;
+
+	static {
+		log = Logger.getLogger( AbstractTestRunner.class.getCanonicalName() );
+	}
 
 	protected abstract class AbstractTestAsRunnable<T extends TestCase> implements TestAsRunnable {
 
@@ -242,9 +249,12 @@ public abstract class AbstractTestRunner implements TestRunner {
 		}
 		if( t.isAlive() ) {
 			try {
-				return runnable.getTimeoutResult();
-			} finally {
 				t.stop();
+				return runnable.getTimeoutResult();
+			} catch( OutOfMemoryError oome ) {
+				log.warning( "Out of memory allocating timeout response. Retrying." );
+				System.gc();
+				return runnable.getTimeoutResult();
 			}
 		}
 		else {
