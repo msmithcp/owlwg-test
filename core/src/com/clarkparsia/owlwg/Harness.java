@@ -124,10 +124,15 @@ public class Harness {
 				"Output file for test results (in TURTLE format).  Defaults to stdout." );
 		o.setArgName( "OUTPUT_FILE" );
 		options.addOption( o );
+		o = new Option( "t", "timeout",true,
+				"Per test timeout (in seconds).  Defaults to 60." );
+		o.setArgName( "TIMEOUT" );
+		options.addOption( o );
 
 		FilterCondition filter;
 		URI testFileUri;
 		Writer resultsWriter;
+		long timeoutS, timeout;
 		try {
 			CommandLineParser parser = new GnuParser();
 			CommandLine line = parser.parse( options, args );
@@ -141,6 +146,13 @@ public class Harness {
 			resultsWriter = (outFilename == null)
 				? new OutputStreamWriter( System.out )
 				: new OutputStreamWriter( new FileOutputStream( new File( outFilename ) ) );
+
+			String timeoutString = line.getOptionValue( "timeout" );
+			timeoutS = (timeoutString == null)
+				? 60
+				: Long.parseLong( timeoutString );
+			if( timeoutS < 1 )
+				throw new IllegalArgumentException();
 
 			String[] remaining = line.getArgs();
 			if( remaining.length != 1 )
@@ -158,6 +170,7 @@ public class Harness {
 			log.log( Level.SEVERE, "Command line parsing failed.", e );
 			return;
 		}
+		timeout = timeoutS * 1000;
 
 		final OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 
@@ -195,7 +208,7 @@ public class Harness {
 
 			while( it.hasNext() ) {
 				TestCase c = it.next();
-				for( TestRunResult result : runner.run( c, 60000 ) ) {
+				for( TestRunResult result : runner.run( c, timeout ) ) {
 					OWLIndividual i = manager.getOWLDataFactory().getOWLAnonymousIndividual(
 							URI.create( "run" + (bnodeid++) ) );
 
