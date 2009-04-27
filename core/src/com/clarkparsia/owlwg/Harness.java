@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -130,6 +131,7 @@ public class Harness {
 		options.addOption( o );
 
 		FilterCondition filter;
+		HelpFormatter help = new HelpFormatter();
 		URI testFileUri;
 		Writer resultsWriter;
 		long timeoutS, timeout;
@@ -161,6 +163,7 @@ public class Harness {
 			testFileUri = URI.create( remaining[0] );
 		} catch( ParseException e ) {
 			log.log( Level.SEVERE, "Command line parsing failed.", e );
+			help.printHelp( 80, Harness.class.getCanonicalName(), "", options, "" );
 			return;
 		} catch( FileNotFoundException e ) {
 			log.log( Level.SEVERE, "File not found.", e );
