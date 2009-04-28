@@ -11,8 +11,13 @@ import java.util.Map;
 import java.util.Set;
 
 import com.clarkparsia.owlwg.runner.TestRunner;
+import com.clarkparsia.owlwg.testcase.ConsistencyTest;
+import com.clarkparsia.owlwg.testcase.InconsistencyTest;
+import com.clarkparsia.owlwg.testcase.NegativeEntailmentTest;
+import com.clarkparsia.owlwg.testcase.PositiveEntailmentTest;
 import com.clarkparsia.owlwg.testcase.Status;
 import com.clarkparsia.owlwg.testcase.TestCase;
+import com.clarkparsia.owlwg.testcase.TestCaseVisitor;
 import com.clarkparsia.owlwg.testrun.RunTestType;
 import com.clarkparsia.owlwg.testrun.TestRunResult;
 
@@ -35,20 +40,6 @@ import com.clarkparsia.owlwg.testrun.TestRunResult;
  */
 public class Utilities {
 
-	public static Map<Status, Collection<TestCase>> indexByStatus(Iterable<TestCase> cases) {
-		Map<Status, Collection<TestCase>> byStatus = new HashMap<Status, Collection<TestCase>>();
-		for( Status s : Status.values() ) {
-			byStatus.put( s, new ArrayList<TestCase>() );
-		}
-		byStatus.put( null, new ArrayList<TestCase>() );
-
-		for( TestCase c : cases ) {
-			Status s = c.getStatus();
-			byStatus.get( s ).add( c );
-		}
-		return byStatus;
-	}
-
 	public static Collection<TestRunner> collectRunners(Collection<TestRunResult> results) {
 		Set<TestRunner> set = new HashSet<TestRunner>();
 		for( TestRunResult r : results )
@@ -68,6 +59,46 @@ public class Utilities {
 		EnumSet<RunTestType> set = EnumSet.noneOf( RunTestType.class );
 		for( TestRunResult r : results )
 			set.add( r.getTestType() );
+		return set;
+	}
+
+	public static Map<Status, Collection<TestCase>> indexByStatus(Iterable<TestCase> cases) {
+		Map<Status, Collection<TestCase>> byStatus = new HashMap<Status, Collection<TestCase>>();
+		for( Status s : Status.values() ) {
+			byStatus.put( s, new ArrayList<TestCase>() );
+		}
+		byStatus.put( null, new ArrayList<TestCase>() );
+
+		for( TestCase c : cases ) {
+			Status s = c.getStatus();
+			byStatus.get( s ).add( c );
+		}
+		return byStatus;
+	}
+
+	public static EnumSet<RunTestType> possibleRunTestTypes(TestCase c) {
+		final EnumSet<RunTestType> set = EnumSet.noneOf( RunTestType.class );
+		c.accept( new TestCaseVisitor() {
+
+			public void visit(ConsistencyTest testcase) {
+				set.add( RunTestType.CONSISTENCY );
+			}
+
+			public void visit(InconsistencyTest testcase) {
+				set.add( RunTestType.INCONSISTENCY );
+			}
+
+			public void visit(NegativeEntailmentTest testcase) {
+				set.add( RunTestType.CONSISTENCY );
+				set.add( RunTestType.NEGATIVE_ENTAILMENT );
+			}
+
+			public void visit(PositiveEntailmentTest testcase) {
+				set.add( RunTestType.CONSISTENCY );
+				set.add( RunTestType.POSITIVE_ENTAILMENT );
+			}
+
+		} );
 		return set;
 	}
 

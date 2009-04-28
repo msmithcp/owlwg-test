@@ -3,8 +3,8 @@ package com.clarkparsia.owlwg.presentation;
 import static com.clarkparsia.owlwg.Constants.RESULTS_ONTOLOGY_PHYSICAL_URI;
 import static com.clarkparsia.owlwg.Constants.TEST_ONTOLOGY_PHYSICAL_URI;
 import static com.clarkparsia.owlwg.presentation.Utilities.collectRunners;
-import static com.clarkparsia.owlwg.presentation.Utilities.collectTestTypes;
 import static com.clarkparsia.owlwg.presentation.Utilities.indexByStatus;
+import static com.clarkparsia.owlwg.presentation.Utilities.possibleRunTestTypes;
 import static java.lang.String.format;
 
 import java.net.URI;
@@ -127,38 +127,49 @@ public class AggregateResultWikiFormatter {
 			System.arraycopy( Status.values(), 0, statuses, 0, Status.values().length );
 			statuses[statuses.length - 1] = null;
 			for( Status status : statuses ) {
+				if( Status.REJECTED.equals( status ) )
+					continue;
+
 				out.append( format( "\n=== %s ===\n\n", (status == null)
 					? "NO STATUS"
 					: status ) );
 
-				out.append( "{| border=\"1\"\n|-\n!Test\n!Type\n" );
 				Collection<TestCase> sCases = statusToCase.get( status );
 				List<TestRunResult> sResults = new ArrayList<TestRunResult>();
 				for( TestCase c : sCases )
 					sResults.addAll( caseToResult.get( c ) );
+
 				Collection<TestRunner> runners = collectRunners( sResults );
+
+				out.append( "{| border=\"1\"\n|-\n!Test\n!Type\n" );
 
 				for( TestRunner r : runners )
 					out.append( format( "!%s\n", r.getURI() ) );
 				for( TestCase c : statusToCase.get( status ) ) {
 					final List<TestRunResult> cResults = caseToResult.get( c );
-					Set<RunTestType> testTypes = collectTestTypes( cResults );
-					out.append( testTypes.size() > 1
-						? format( "|-\n|rowspan=\"%d\"|%s\n", testTypes.size(), c.getIdentifier() )
-						: format( "|-\n|%s\n", c.getIdentifier() ) );
+					Set<RunTestType> testTypes = possibleRunTestTypes( c );
+					out
+							.append( testTypes.size() > 1
+								? format( "|-\n|rowspan=\"%d\"|%s\n", testTypes.size(),
+										caseToTableCell( c ) )
+								: format( "|-\n|%s\n", caseToTableCell( c ) ) );
 					boolean firstRow = true;
 					for( RunTestType type : testTypes ) {
 						if( !firstRow )
 							out.append( "|-\n" );
 						else
 							firstRow = false;
-						out.append( format( "|%s\n", type ) );
+						out.append( format( "%s\n", testTypeToTableCell( type ) ) );
+						/*
+						 * FIXME: This will intermingle different syntax
+						 * constraint tests
+						 */
 						for( TestRunner runner : runners ) {
 							boolean match = false;
 							for( TestRunResult r : cResults ) {
 								if( r.getTestType().equals( type )
 										&& r.getTestRunner().equals( runner ) ) {
-									out.append( format( "|%s\n", resultToTableCell( r ) ) );
+									out.append( format( "%s\n", resultToTableCell( r ) ) );
 									match = true;
 									break;
 								}
@@ -178,21 +189,56 @@ public class AggregateResultWikiFormatter {
 		}
 	}
 
-	private static String resultToTableCell(TestRunResult r) {
+	private static String testTypeToTableCell(RunTestType t) {
 		String ret;
-		switch ( r.getResultType() ) {
-		case FAILING:
-			ret = "FAIL";
+		switch ( t ) {
+		case CONSISTENCY:
+			ret = "|Consistency";
 			break;
-		case INCOMPLETE:
-			ret = "INCOMPLETE";
+		case INCONSISTENCY:
+			ret = "|Inconsistency";
 			break;
-		case PASSING:
-			ret = "PASS";
+		case POSITIVE_ENTAILMENT:
+			ret = "|Positive Entailment";
+			break;
+		case NEGATIVE_ENTAILMENT:
+			ret = "|Negative Entailment";
+			break;
+		case SYNTAX_CONSTRAINT:
+			ret = "|Profile";
+			break;
+		case SYNTAX_TRANSLATION:
+			ret = "|Translation";
 			break;
 		default:
 			throw new IllegalStateException();
 		}
 		return ret;
+	}
+
+	private static String resultToTableCell(TestRunResult r) {
+		String ret;
+		switch ( r.getResultType() ) {
+		case FAILING:
+			ret = "|style=\"background:red; color:white\"|Fail";
+			break;
+		case INCOMPLETE:
+			String details = r.getDetails();
+			if( details == null )
+				ret = "|Incomplete";
+			else
+				ret = format( "|<span title=\"%s\">Incomplete</span>", details );
+			break;
+		case PASSING:
+			ret = "|style=\"background:green; color:white\"|Pass";
+			break;
+		default:
+			throw new IllegalStateException();
+		}
+		return ret;
+	}
+
+	private static String caseToTableCell(TestCase c) {
+		return format( "[%s %s]", c.getURI(), c.getIdentifier() );
 	}
 }
