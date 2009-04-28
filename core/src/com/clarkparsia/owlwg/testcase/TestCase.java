@@ -1,5 +1,6 @@
 package com.clarkparsia.owlwg.testcase;
 
+import java.net.URI;
 import java.util.Set;
 
 /**
@@ -35,4 +36,6 @@ public interface TestCase {
 	public Status getStatus();
 
 	public Set<SyntaxConstraint> getUnsatisfiedConstraints();
+
+	public URI getURI();
 }

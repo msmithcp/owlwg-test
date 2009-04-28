@@ -9,6 +9,7 @@ import static com.clarkparsia.owlwg.testcase.TestVocabulary.ObjectProperty.STATU
 import static java.lang.String.format;
 import static java.util.Collections.unmodifiableSet;
 
+import java.net.URI;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
@@ -57,7 +58,11 @@ public abstract class AbstractBaseTestCase implements TestCase {
 
 	private final Status					status;
 
+	private final URI						uri;
+
 	public AbstractBaseTestCase(OWLOntology ontology, OWLIndividual i) {
+
+		uri = i.getURI();
 
 		Map<OWLDataPropertyExpression, Set<OWLConstant>> dpValues = i
 				.getDataPropertyValues( ontology );
@@ -197,6 +202,10 @@ public abstract class AbstractBaseTestCase implements TestCase {
 
 	public Set<SyntaxConstraint> getUnsatisfiedConstraints() {
 		return unmodifiableSet( notsatisfied );
+	}
+
+	public URI getURI() {
+		return uri;
 	}
 
 }
