@@ -150,9 +150,11 @@ public abstract class AbstractTestRunner implements TestRunner {
 		}
 
 		public void run() {
-			if( !testcase.getPremiseFormats().contains( RDFXML ) )
+			if( !testcase.getPremiseFormats().contains( RDFXML ) ) {
 				result = new ReasoningRun( testcase, INCOMPLETE, type, AbstractTestRunner.this,
-						"Only RDF/XML input ontology parsing supported." );
+						"Only RDF/XML input ontology parsing supported by harness." );
+				return;
+			}
 
 			OWLOntology o;
 			try {
@@ -191,12 +193,16 @@ public abstract class AbstractTestRunner implements TestRunner {
 		}
 
 		public void run() {
-			if( !testcase.getPremiseFormats().contains( RDFXML ) )
+			if( !testcase.getPremiseFormats().contains( RDFXML ) ) {
 				result = new ReasoningRun( testcase, INCOMPLETE, type, AbstractTestRunner.this,
-						"Only RDF/XML input ontology parsing supported." );
-			if( !testcase.getConclusionFormats().contains( RDFXML ) )
+						"Only RDF/XML input ontology parsing supported by harness." );
+				return;
+			}
+			if( !testcase.getConclusionFormats().contains( RDFXML ) ) {
 				result = new ReasoningRun( testcase, INCOMPLETE, type, AbstractTestRunner.this,
-						"Only RDF/XML input ontology parsing supported." );
+						"Only RDF/XML input ontology parsing supported by harness." );
+				return;
+			}
 
 			OWLOntology premise, conclusion;
 			try {
