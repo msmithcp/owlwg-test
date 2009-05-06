@@ -25,7 +25,6 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.coode.owl.rdf.rdfxml.RDFXMLRenderer;
 import org.coode.owl.rdf.turtle.TurtleRenderer;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLAxiom;
@@ -44,9 +43,11 @@ import com.clarkparsia.owlwg.testcase.TestCase;
 import com.clarkparsia.owlwg.testcase.filter.ConjunctionFilter;
 import com.clarkparsia.owlwg.testcase.filter.DisjunctionFilter;
 import com.clarkparsia.owlwg.testcase.filter.FilterCondition;
+import com.clarkparsia.owlwg.testcase.filter.NegationFilter;
 import com.clarkparsia.owlwg.testcase.filter.SatisfiedSyntaxConstraintFilter;
 import com.clarkparsia.owlwg.testcase.filter.SemanticsFilter;
 import com.clarkparsia.owlwg.testcase.filter.StatusFilter;
+import com.clarkparsia.owlwg.testcase.filter.UnsatisfiedSyntaxConstraintFilter;
 import com.clarkparsia.owlwg.testrun.ResultVocabulary;
 import com.clarkparsia.owlwg.testrun.TestRunResult;
 import com.clarkparsia.owlwg.testrun.TestRunResultAdapter;
@@ -232,7 +233,7 @@ public class Harness {
 		}
 	}
 
-	private static FilterCondition parseFilterCondition(String filterString) {
+	public static FilterCondition parseFilterCondition(String filterString) {
 		FilterCondition filter;
 		LinkedList<FilterCondition> filterStack = new LinkedList<FilterCondition>();
 		String[] splits = filterString.split( "\\s" );
@@ -251,6 +252,19 @@ public class Harness {
 			else if( splits[i].equalsIgnoreCase( "dl" ) ) {
 				filterStack.add( new SatisfiedSyntaxConstraintFilter( SyntaxConstraint.DL ) );
 			}
+			else if( splits[i].equalsIgnoreCase( "!dl" ) ) {
+				filterStack.add( new UnsatisfiedSyntaxConstraintFilter( SyntaxConstraint.DL ) );
+			}
+			else if( splits[i].equalsIgnoreCase( "el" ) ) {
+				filterStack.add( new SatisfiedSyntaxConstraintFilter( SyntaxConstraint.EL ) );
+			}
+			else if( splits[i].equalsIgnoreCase( "!el" ) ) {
+				filterStack.add( new UnsatisfiedSyntaxConstraintFilter( SyntaxConstraint.EL ) );
+			}
+			else if( splits[i].equalsIgnoreCase( "not" ) ) {
+				FilterCondition a = filterStack.removeLast();
+				filterStack.add( new NegationFilter( a ) );
+			}
 			else if( splits[i].equalsIgnoreCase( "or" ) ) {
 				FilterCondition a = filterStack.removeLast();
 				FilterCondition b = filterStack.removeLast();
@@ -259,8 +273,20 @@ public class Harness {
 			else if( splits[i].equalsIgnoreCase( "proposed" ) ) {
 				filterStack.add( new StatusFilter( Status.PROPOSED ) );
 			}
+			else if( splits[i].equalsIgnoreCase( "ql" ) ) {
+				filterStack.add( new SatisfiedSyntaxConstraintFilter( SyntaxConstraint.QL ) );
+			}
+			else if( splits[i].equalsIgnoreCase( "!ql" ) ) {
+				filterStack.add( new UnsatisfiedSyntaxConstraintFilter( SyntaxConstraint.QL ) );
+			}
 			else if( splits[i].equalsIgnoreCase( "rdf" ) ) {
 				filterStack.add( new SemanticsFilter( Semantics.RDF ) );
+			}
+			else if( splits[i].equalsIgnoreCase( "rl" ) ) {
+				filterStack.add( new SatisfiedSyntaxConstraintFilter( SyntaxConstraint.RL ) );
+			}
+			else if( splits[i].equalsIgnoreCase( "!rl" ) ) {
+				filterStack.add( new UnsatisfiedSyntaxConstraintFilter( SyntaxConstraint.RL ) );
 			}
 			else {
 				final String msg = format( "Unexpected filter condition argument: \"%s\"",
