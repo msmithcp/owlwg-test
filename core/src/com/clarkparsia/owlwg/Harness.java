@@ -282,6 +282,9 @@ public class Harness {
 			else if( splits[i].equalsIgnoreCase( "rdf" ) ) {
 				filterStack.add( new SemanticsFilter( Semantics.RDF ) );
 			}
+			else if( splits[i].equalsIgnoreCase( "rejected" ) ) {
+				filterStack.add( new StatusFilter( Status.REJECTED ) );
+			}
 			else if( splits[i].equalsIgnoreCase( "rl" ) ) {
 				filterStack.add( new SatisfiedSyntaxConstraintFilter( SyntaxConstraint.RL ) );
 			}
