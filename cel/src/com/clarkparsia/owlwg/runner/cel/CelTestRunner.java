@@ -15,7 +15,7 @@ import com.clarkparsia.owlwg.runner.EntailmentChecker;
 import de.tudresden.inf.lat.cel.owlapi.CelReasoner;
 
 /**
- * Runs tests for CEL.
+ * Test runner for CEL.
  */
 public class CelTestRunner extends AbstractTestRunner {
 
