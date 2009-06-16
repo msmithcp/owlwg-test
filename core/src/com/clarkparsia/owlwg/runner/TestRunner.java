@@ -3,6 +3,8 @@ package com.clarkparsia.owlwg.runner;
 import java.net.URI;
 import java.util.Collection;
 
+import org.semanticweb.owl.inference.OWLReasonerException;
+
 import com.clarkparsia.owlwg.testcase.TestCase;
 import com.clarkparsia.owlwg.testrun.TestRunResult;
 
@@ -46,4 +48,11 @@ public interface TestRunner {
 	 *         tests attempted.
 	 */
 	public Collection<TestRunResult> run(TestCase testcase, long timeout);
+	
+	/**
+	 * Dispose the test runner.
+	 * 
+	 * @throws OWLReasonerException if the runner cannot be disposed.
+	 */
+	public void dispose() throws OWLReasonerException;
 }

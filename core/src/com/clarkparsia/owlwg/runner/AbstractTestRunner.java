@@ -292,4 +292,7 @@ public abstract class AbstractTestRunner implements TestRunner {
 	protected TestRunResult runInconsistencyTest(AbstractPremisedTest testcase) {
 		return run( new XConsistencyTest( testcase, INCONSISTENCY ) );
 	}
+	
+	public void dispose() throws OWLReasonerException {
+	}
 }

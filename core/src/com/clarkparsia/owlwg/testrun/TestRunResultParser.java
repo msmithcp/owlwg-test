@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.semanticweb.owl.inference.OWLReasonerException;
 import org.semanticweb.owl.model.OWLAnnotation;
 import org.semanticweb.owl.model.OWLClassAssertionAxiom;
 import org.semanticweb.owl.model.OWLConstant;
@@ -97,6 +98,10 @@ public class TestRunResultParser {
 		@Override
 		public String toString() {
 			return uri.toString();
+		}
+
+		@Override
+		public void dispose() throws OWLReasonerException {
 		}
 	}
 

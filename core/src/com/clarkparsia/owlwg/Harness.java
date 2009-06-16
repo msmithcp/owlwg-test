@@ -27,6 +27,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.coode.owl.rdf.turtle.TurtleRenderer;
 import org.semanticweb.owl.apibinding.OWLManager;
+import org.semanticweb.owl.inference.OWLReasonerException;
 import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLIndividual;
 import org.semanticweb.owl.model.OWLOntology;
@@ -221,11 +222,15 @@ public class Harness {
 				}
 				it.remove();
 			}
+			
+			runner.dispose();
 
 			TurtleRenderer renderer = new TurtleRenderer( resultOntology, manager, resultsWriter );
 
 			renderer.render();
 
+		} catch( OWLReasonerException e ) {
+			log.log( Level.SEVERE, "Ontology creation exception caught.", e );
 		} catch( OWLOntologyCreationException e ) {
 			log.log( Level.SEVERE, "Ontology creation exception caught.", e );
 		} catch( OWLOntologyChangeException e ) {
