@@ -1,12 +1,15 @@
 package com.clarkparsia.owlwg.testcase;
 
 import static com.clarkparsia.owlwg.testcase.TestVocabulary.DatatypeProperty.FUNCTIONAL_CONCLUSION_ONTOLOGY;
+import static com.clarkparsia.owlwg.testcase.TestVocabulary.DatatypeProperty.FUNCTIONAL_INPUT_ONTOLOGY;
 import static com.clarkparsia.owlwg.testcase.TestVocabulary.DatatypeProperty.FUNCTIONAL_NONCONCLUSION_ONTOLOGY;
 import static com.clarkparsia.owlwg.testcase.TestVocabulary.DatatypeProperty.FUNCTIONAL_PREMISE_ONTOLOGY;
 import static com.clarkparsia.owlwg.testcase.TestVocabulary.DatatypeProperty.OWLXML_CONCLUSION_ONTOLOGY;
+import static com.clarkparsia.owlwg.testcase.TestVocabulary.DatatypeProperty.OWLXML_INPUT_ONTOLOGY;
 import static com.clarkparsia.owlwg.testcase.TestVocabulary.DatatypeProperty.OWLXML_NONCONCLUSION_ONTOLOGY;
 import static com.clarkparsia.owlwg.testcase.TestVocabulary.DatatypeProperty.OWLXML_PREMISE_ONTOLOGY;
 import static com.clarkparsia.owlwg.testcase.TestVocabulary.DatatypeProperty.RDFXML_CONCLUSION_ONTOLOGY;
+import static com.clarkparsia.owlwg.testcase.TestVocabulary.DatatypeProperty.RDFXML_INPUT_ONTOLOGY;
 import static com.clarkparsia.owlwg.testcase.TestVocabulary.DatatypeProperty.RDFXML_NONCONCLUSION_ONTOLOGY;
 import static com.clarkparsia.owlwg.testcase.TestVocabulary.DatatypeProperty.RDFXML_PREMISE_ONTOLOGY;
 
@@ -40,25 +43,27 @@ public enum SerializationFormat {
 	/**
 	 * OWL 2 Functional-Style Syntax
 	 */
-	FUNCTIONAL(Individual.FUNCTIONAL, FUNCTIONAL_PREMISE_ONTOLOGY, FUNCTIONAL_CONCLUSION_ONTOLOGY, FUNCTIONAL_NONCONCLUSION_ONTOLOGY),
+	FUNCTIONAL(Individual.FUNCTIONAL, FUNCTIONAL_INPUT_ONTOLOGY, FUNCTIONAL_PREMISE_ONTOLOGY, FUNCTIONAL_CONCLUSION_ONTOLOGY, FUNCTIONAL_NONCONCLUSION_ONTOLOGY),
 	/**
 	 * OWL 2 XML Syntax
 	 */
-	OWLXML(Individual.OWLXML, OWLXML_PREMISE_ONTOLOGY, OWLXML_CONCLUSION_ONTOLOGY, OWLXML_NONCONCLUSION_ONTOLOGY),
+	OWLXML(Individual.OWLXML, OWLXML_INPUT_ONTOLOGY, OWLXML_PREMISE_ONTOLOGY, OWLXML_CONCLUSION_ONTOLOGY, OWLXML_NONCONCLUSION_ONTOLOGY),
 	/**
 	 * OWL 2 RDF/XML Syntax
 	 */
-	RDFXML(Individual.RDFXML, RDFXML_PREMISE_ONTOLOGY, RDFXML_CONCLUSION_ONTOLOGY, RDFXML_NONCONCLUSION_ONTOLOGY);
+	RDFXML(Individual.RDFXML, RDFXML_INPUT_ONTOLOGY, RDFXML_PREMISE_ONTOLOGY, RDFXML_CONCLUSION_ONTOLOGY, RDFXML_NONCONCLUSION_ONTOLOGY);
 
 	private final TestVocabulary.DatatypeProperty	conclusion;
+	private final TestVocabulary.DatatypeProperty	input;
 	private final TestVocabulary.Individual			i;
 	private final TestVocabulary.DatatypeProperty	nonconclusion;
 	private final TestVocabulary.DatatypeProperty	premise;
 
-	private SerializationFormat(TestVocabulary.Individual i,
+	private SerializationFormat(TestVocabulary.Individual i, TestVocabulary.DatatypeProperty input,
 			TestVocabulary.DatatypeProperty premise, TestVocabulary.DatatypeProperty conclusion,
 			TestVocabulary.DatatypeProperty nonconclusion) {
 		this.i = i;
+		this.input = input;
 		this.premise = premise;
 		this.conclusion = conclusion;
 		this.nonconclusion = nonconclusion;
@@ -78,5 +83,9 @@ public enum SerializationFormat {
 
 	public OWLDataProperty getPremiseOWLDataProperty() {
 		return premise.getOWLDataProperty();
+	}
+
+	public OWLDataProperty getInputOWLDataProperty() {
+		return input.getOWLDataProperty();
 	}
 }

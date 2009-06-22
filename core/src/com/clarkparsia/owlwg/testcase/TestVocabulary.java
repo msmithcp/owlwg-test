@@ -47,13 +47,16 @@ public class TestVocabulary {
 	}
 
 	public enum DatatypeProperty {
-		FUNCTIONAL_CONCLUSION_ONTOLOGY("fsConclusionOntology"),
+		FUNCTIONAL_CONCLUSION_ONTOLOGY("fsInputOntology"),
+		FUNCTIONAL_INPUT_ONTOLOGY("fsConclusionOntology"),
 		FUNCTIONAL_NONCONCLUSION_ONTOLOGY("fsNonConclusionOntology"),
 		FUNCTIONAL_PREMISE_ONTOLOGY("fsPremiseOntology"), IDENTIFIER("identifier"),
 		OWLXML_CONCLUSION_ONTOLOGY("owlXmlConclusionOntology"),
+		OWLXML_INPUT_ONTOLOGY("owlXmlInputOntology"),
 		OWLXML_NONCONCLUSION_ONTOLOGY("owlXmlNonConclusionOntology"),
 		OWLXML_PREMISE_ONTOLOGY("owlXmlPremiseOntology"),
 		RDFXML_CONCLUSION_ONTOLOGY("rdfXmlConclusionOntology"),
+		RDFXML_INPUT_ONTOLOGY("rdfXmlInputOntology"),
 		RDFXML_NONCONCLUSION_ONTOLOGY("rdfXmlNonConclusionOntology"),
 		RDFXML_PREMISE_ONTOLOGY("rdfXmlPremiseOntology");
 
@@ -86,6 +89,7 @@ public class TestVocabulary {
 	}
 
 	public enum ObjectProperty {
+		IMPORTED_ONTOLOGY("importedOntology"), IMPORTED_ONTOLOGY_IRI("importedOntologyIRI"),
 		PROFILE("profile"), SEMANTICS("semantics"), SPECIES("species"), STATUS("status");
 
 		private final OWLObjectProperty	op;
