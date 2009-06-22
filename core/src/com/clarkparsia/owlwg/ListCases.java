@@ -60,10 +60,13 @@ public class ListCases {
 				"Specifies a filter that tests must match to be run" );
 		o.setArgName( "FILTER_STACK" );
 		options.addOption( o );
+		o = new Option( "s", "sort", false, "Sort the results by identifier" );
+		options.addOption( o );
 
 		FilterCondition filter;
 		HelpFormatter help = new HelpFormatter();
 		URI testFileUri;
+		boolean sort;
 		try {
 			CommandLineParser parser = new GnuParser();
 			CommandLine line = parser.parse( options, args );
@@ -72,6 +75,8 @@ public class ListCases {
 			filter = (filterString == null)
 				? FilterCondition.ACCEPT_ALL
 				: parseFilterCondition( filterString );
+
+			sort = line.hasOption( "sort" );
 
 			String[] remaining = line.getArgs();
 			if( remaining.length != 1 )
@@ -97,11 +102,13 @@ public class ListCases {
 
 			TestCollection cases = new TestCollection( casesOntology, filter );
 			List<TestCase> l = cases.asList();
-			Collections.sort( l, new Comparator<TestCase>() {
-				public int compare(TestCase o1, TestCase o2) {
-					return o1.getIdentifier().compareTo( o2.getIdentifier() );
-				}
-			} );
+			if( sort ) {
+				Collections.sort( l, new Comparator<TestCase>() {
+					public int compare(TestCase o1, TestCase o2) {
+						return o1.getIdentifier().compareTo( o2.getIdentifier() );
+					}
+				} );
+			}
 			Iterator<TestCase> it = l.iterator();
 			cases = null;
 
