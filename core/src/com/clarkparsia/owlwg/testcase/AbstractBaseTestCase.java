@@ -2,6 +2,7 @@ package com.clarkparsia.owlwg.testcase;
 
 import static com.clarkparsia.owlwg.testcase.TestVocabulary.DatatypeProperty.IDENTIFIER;
 import static com.clarkparsia.owlwg.testcase.TestVocabulary.Individual.FULL;
+import static com.clarkparsia.owlwg.testcase.TestVocabulary.ObjectProperty.IMPORTED_ONTOLOGY;
 import static com.clarkparsia.owlwg.testcase.TestVocabulary.ObjectProperty.PROFILE;
 import static com.clarkparsia.owlwg.testcase.TestVocabulary.ObjectProperty.SEMANTICS;
 import static com.clarkparsia.owlwg.testcase.TestVocabulary.ObjectProperty.SPECIES;
@@ -11,15 +12,19 @@ import static java.util.Collections.unmodifiableSet;
 
 import java.net.URI;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.semanticweb.owl.apibinding.OWLManager;
+import org.semanticweb.owl.io.StringInputSource;
 import org.semanticweb.owl.model.OWLConstant;
 import org.semanticweb.owl.model.OWLDataPropertyExpression;
 import org.semanticweb.owl.model.OWLIndividual;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;
 import org.semanticweb.owl.model.OWLOntology;
+import org.semanticweb.owl.model.OWLOntologyCreationException;
 import org.semanticweb.owl.model.OWLOntologyManager;
 
 import com.clarkparsia.owlwg.testcase.TestVocabulary.Individual;
@@ -44,21 +49,29 @@ import com.clarkparsia.owlwg.testcase.TestVocabulary.Individual;
  */
 public abstract class AbstractBaseTestCase implements TestCase {
 
-	private final String					identifier;
+	private final static Logger					log;
 
-	private final OWLOntologyManager		manager;
+	static {
+		log = Logger.getLogger( AbstractBaseTestCase.class.getCanonicalName() );
+	}
 
-	private final EnumSet<SyntaxConstraint>	notsatisfied;
+	private final String						identifier;
 
-	private final EnumSet<Semantics>		notsemantics;
+	private final Map<URI, ImportedOntology>	imports;
 
-	private final EnumSet<SyntaxConstraint>	satisfied;
+	private final OWLOntologyManager			manager;
 
-	private final EnumSet<Semantics>		semantics;
+	private final EnumSet<SyntaxConstraint>		notsatisfied;
 
-	private final Status					status;
+	private final EnumSet<Semantics>			notsemantics;
 
-	private final URI						uri;
+	private final EnumSet<SyntaxConstraint>		satisfied;
+
+	private final EnumSet<Semantics>			semantics;
+
+	private final Status						status;
+
+	private final URI							uri;
 
 	public AbstractBaseTestCase(OWLOntology ontology, OWLIndividual i) {
 
@@ -76,6 +89,16 @@ public abstract class AbstractBaseTestCase implements TestCase {
 
 		Map<OWLObjectPropertyExpression, Set<OWLIndividual>> opValues = i
 				.getObjectPropertyValues( ontology );
+
+		imports = new HashMap<URI, ImportedOntology>();
+		Set<OWLIndividual> importedOntologies = opValues.get( IMPORTED_ONTOLOGY
+				.getOWLObjectProperty() );
+		if( importedOntologies != null && false ) {
+			for( OWLIndividual ind : importedOntologies ) {
+				ImportedOntology io = new ImportedOntologyImpl( ontology, ind );
+				imports.put( io.getURI(), io );
+			}
+		}
 
 		Set<OWLIndividual> statuses = opValues.get( STATUS.getOWLObjectProperty() );
 		if( statuses == null || statuses.isEmpty() )
@@ -184,6 +207,22 @@ public abstract class AbstractBaseTestCase implements TestCase {
 		return identifier;
 	}
 
+	public String getImportedOntology(URI uri, SerializationFormat format) {
+		ImportedOntology io = imports.get( uri );
+		if( io == null )
+			return null;
+		else
+			return io.getOntology( format );
+	}
+
+	public Set<SerializationFormat> getImportedOntologyFormats(URI uri) {
+		ImportedOntology io = imports.get( uri );
+		if( io == null )
+			return EnumSet.noneOf( SerializationFormat.class );
+		else
+			return io.getFormats();
+	}
+
 	public Set<Semantics> getNotApplicableSemantics() {
 		return unmodifiableSet( notsemantics );
 	}
@@ -208,4 +247,28 @@ public abstract class AbstractBaseTestCase implements TestCase {
 		return uri;
 	}
 
+	protected void parseAllImportedOntologies() throws OWLOntologyCreationException {
+		for( ImportedOntology io : imports.values() ) {
+			if( !manager.contains( io.getURI() ) ) {
+				String str = io.getOntology( SerializationFormat.RDFXML );
+				if( str == null ) {
+					final String msg = format(
+							"Imported ontology (%s) not provided in RDF/XML syntax for testcase (%s)",
+							io.getURI(), getIdentifier() );
+					log.warning( msg );
+					throw new OWLOntologyCreationException( msg );
+				}
+				else {
+					StringInputSource source = new StringInputSource( str );
+					try {
+						getOWLOntologyManager().loadOntology( source );
+					} catch( OWLOntologyCreationException e ) {
+						log.warning( format( "Failed to parse imported ontology for testcase (%s)",
+								getIdentifier() ) );
+						throw e;
+					}
+				}
+			}
+		}
+	}
 }

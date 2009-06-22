@@ -85,6 +85,7 @@ public abstract class AbstractEntailmentTest extends AbstractPremisedTest {
 
 	public OWLOntology parseConclusionOntology(SerializationFormat format)
 			throws OWLOntologyCreationException {
+		parseAllImportedOntologies();
 		OWLOntology o = conclusionOntology.get( format );
 		if( o == null ) {
 			String l = conclusionOntologyLiteral.get( format );

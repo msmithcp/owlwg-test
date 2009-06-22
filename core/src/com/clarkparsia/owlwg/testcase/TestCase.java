@@ -29,6 +29,10 @@ public interface TestCase {
 
 	public String getIdentifier();
 
+	public String getImportedOntology(URI uri, SerializationFormat format);
+
+	public Set<SerializationFormat> getImportedOntologyFormats(URI uri);
+
 	public Set<Semantics> getNotApplicableSemantics();
 
 	public Set<SyntaxConstraint> getSatisfiedConstraints();

@@ -81,6 +81,7 @@ public abstract class AbstractPremisedTest extends AbstractBaseTestCase {
 
 	public OWLOntology parsePremiseOntology(SerializationFormat format)
 			throws OWLOntologyCreationException {
+		parseAllImportedOntologies();
 		OWLOntology o = premiseOntology.get( format );
 		if( o == null ) {
 			String l = premiseOntologyLiteral.get( format );
