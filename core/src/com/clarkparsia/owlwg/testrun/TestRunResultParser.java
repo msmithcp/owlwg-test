@@ -100,7 +100,6 @@ public class TestRunResultParser {
 			return uri.toString();
 		}
 
-		@Override
 		public void dispose() throws OWLReasonerException {
 		}
 	}
