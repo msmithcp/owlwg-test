@@ -63,7 +63,7 @@ public class CelTestRunner extends OwlApi2AbstractRunner {
 		reasoner.loadOntologies(Collections.singleton(premise));
 		reasoner.classify();
 
-		OwlApi2EntailmentChecker checker = new OwlApi2EntailmentChecker(reasoner, manager
+		CelEntailmentChecker checker = new CelEntailmentChecker(reasoner, manager
 				.getOWLDataFactory());
 
 		boolean ret = true;
