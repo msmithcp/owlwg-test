@@ -1,0 +1,3 @@
+group cli-wiki : cli-default;
+
+case(c) ::= "* [<c.URI> <c.identifier>]"

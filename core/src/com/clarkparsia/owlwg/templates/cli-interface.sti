@@ -1,0 +1,4 @@
+interface cli-interface;
+
+list-cases(count,cases);
+case(c);

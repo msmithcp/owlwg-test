@@ -1,0 +1,9 @@
+group cli-default implements cli-interface;
+
+list-cases(count,cases) ::= <<
+<count> test cases match filter.
+
+<cases:case(c=it); separator="\n">
+>>
+
+case(c) ::= "<c.identifier>"

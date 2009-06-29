@@ -7,11 +7,15 @@ import static java.lang.String.format;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.antlr.stringtemplate.CommonGroupLoader;
+import org.antlr.stringtemplate.StringTemplate;
+import org.antlr.stringtemplate.StringTemplateErrorListener;
+import org.antlr.stringtemplate.StringTemplateGroup;
+import org.antlr.stringtemplate.StringTemplateGroupLoader;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -51,6 +55,20 @@ public class ListCases {
 
 	static {
 		log = Logger.getLogger( ListCases.class.getCanonicalName() );
+
+		StringTemplateGroupLoader loader = new CommonGroupLoader(
+				"com/clarkparsia/owlwg/templates", new StringTemplateErrorListener() {
+
+					public void error(String msg, Throwable e) {
+						log.log( Level.SEVERE, msg, e );
+					}
+
+					public void warning(String msg) {
+						log.warning( msg );
+					}
+
+				} );
+		StringTemplateGroup.registerGroupLoader( loader );
 	}
 
 	public static void main(String[] args) {
@@ -60,12 +78,19 @@ public class ListCases {
 				"Specifies a filter that tests must match to be run" );
 		o.setArgName( "FILTER_STACK" );
 		options.addOption( o );
+
 		o = new Option( "s", "sort", false, "Sort the results by identifier" );
+		options.addOption( o );
+
+		o = new Option( "F", "output-format", true,
+				"Indicate desired output format (default, wiki)" );
+		o.setArgName( "OUTPUT_FORMAT" );
 		options.addOption( o );
 
 		FilterCondition filter;
 		HelpFormatter help = new HelpFormatter();
 		URI testFileUri;
+		String outputTemplate;
 		boolean sort;
 		try {
 			CommandLineParser parser = new GnuParser();
@@ -82,6 +107,16 @@ public class ListCases {
 			if( remaining.length != 1 )
 				throw new IllegalArgumentException();
 
+			String outputFormat = line.getOptionValue( "output-format", "default" );
+			if( "default".equalsIgnoreCase( outputFormat ) )
+				outputTemplate = "cli-default";
+			else if( "wiki".equalsIgnoreCase( outputFormat ) )
+				outputTemplate = "cli-wiki";
+			else
+				throw new IllegalArgumentException( format(
+						"Unrecognized output format (%s). Expecting 'default' or 'wiki')",
+						outputFormat ) );
+
 			testFileUri = URI.create( remaining[0] );
 		} catch( ParseException e ) {
 			log.log( Level.SEVERE, "Command line parsing failed.", e );
@@ -92,6 +127,9 @@ public class ListCases {
 			log.log( Level.SEVERE, "Command line parsing failed.", e );
 			return;
 		}
+
+		final StringTemplateGroup stg = StringTemplateGroup.loadGroup( outputTemplate );
+		final StringTemplate template = stg.getInstanceOf( "list-cases" );
 
 		final OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 
@@ -109,17 +147,12 @@ public class ListCases {
 					}
 				} );
 			}
-			Iterator<TestCase> it = l.iterator();
 			cases = null;
 
 			int n = l.size();
-			System.out.println( format( "%d test cases matched filter:", n ) );
-			while( it.hasNext() ) {
-				TestCase c = it.next();
-				System.out.println( format( "\"%s\" %s", c.getIdentifier(), c.getURI() ) );
-				it.remove();
-				n++;
-			}
+			template.setAttribute( "count", n );
+			template.setAttribute( "cases", l );
+			System.out.print( template.toString() );
 
 		} catch( OWLOntologyCreationException e ) {
 			log.log( Level.SEVERE, "Ontology creation exception caught.", e );
