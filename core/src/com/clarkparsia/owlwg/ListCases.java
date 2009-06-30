@@ -1,7 +1,7 @@
 package com.clarkparsia.owlwg;
 
 import static com.clarkparsia.owlwg.Constants.TEST_ONTOLOGY_PHYSICAL_URI;
-import static com.clarkparsia.owlwg.Harness.parseFilterCondition;
+import static com.clarkparsia.owlwg.cli.FilterConditionParser.parse;
 import static java.lang.String.format;
 
 import java.net.URI;
@@ -28,6 +28,7 @@ import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyCreationException;
 import org.semanticweb.owl.model.OWLOntologyManager;
 
+import com.clarkparsia.owlwg.cli.FilterConditionParser;
 import com.clarkparsia.owlwg.testcase.TestCase;
 import com.clarkparsia.owlwg.testcase.filter.FilterCondition;
 
@@ -99,7 +100,7 @@ public class ListCases {
 			String filterString = line.getOptionValue( "filter" );
 			filter = (filterString == null)
 				? FilterCondition.ACCEPT_ALL
-				: parseFilterCondition( filterString );
+				: FilterConditionParser.parse( filterString );
 
 			sort = line.hasOption( "sort" );
 
