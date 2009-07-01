@@ -1,5 +1,6 @@
 package com.clarkparsia.owlwg.testcase.filter;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 import com.clarkparsia.owlwg.testcase.TestCase;
@@ -23,6 +24,14 @@ import com.clarkparsia.owlwg.testcase.TestCase;
  * @author Mike Smith &lt;msmith@clarkparsia.com&gt;
  */
 public class DisjunctionFilter implements FilterCondition {
+
+	public static DisjunctionFilter or(Collection<? extends FilterCondition> conditions) {
+		return new DisjunctionFilter( conditions );
+	}
+
+	public static DisjunctionFilter or(FilterCondition... conditions) {
+		return or( Arrays.asList( conditions ) );
+	}
 
 	final private FilterCondition[]	conditions;
 

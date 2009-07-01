@@ -22,6 +22,10 @@ import com.clarkparsia.owlwg.testcase.TestCase;
  */
 public class NegationFilter implements FilterCondition {
 
+	public final static NegationFilter not(FilterCondition condition) {
+		return new NegationFilter( condition );
+	}
+
 	final private FilterCondition	condition;
 
 	public NegationFilter(FilterCondition condition) {

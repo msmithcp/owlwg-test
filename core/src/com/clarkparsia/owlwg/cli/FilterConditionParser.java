@@ -7,7 +7,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.clarkparsia.owlwg.testcase.Semantics;
-import com.clarkparsia.owlwg.testcase.Status;
 import com.clarkparsia.owlwg.testcase.SyntaxConstraint;
 import com.clarkparsia.owlwg.testcase.filter.ConjunctionFilter;
 import com.clarkparsia.owlwg.testcase.filter.DisjunctionFilter;
@@ -52,40 +51,40 @@ public class FilterConditionParser {
 			if( splits[i].equalsIgnoreCase( "and" ) ) {
 				FilterCondition a = filterStack.removeLast();
 				FilterCondition b = filterStack.removeLast();
-				filterStack.add( new ConjunctionFilter( a, b ) );
+				filterStack.add( ConjunctionFilter.and( a, b ) );
 			}
 			else if( splits[i].equalsIgnoreCase( "approved" ) ) {
-				filterStack.add( new StatusFilter( Status.APPROVED ) );
+				filterStack.add( StatusFilter.APPROVED );
 			}
 			else if( splits[i].equalsIgnoreCase( "direct" ) ) {
 				filterStack.add( new SemanticsFilter( Semantics.DIRECT ) );
 			}
 			else if( splits[i].equalsIgnoreCase( "dl" ) ) {
-				filterStack.add( new SatisfiedSyntaxConstraintFilter( SyntaxConstraint.DL ) );
+				filterStack.add( SatisfiedSyntaxConstraintFilter.DL );
 			}
 			else if( splits[i].equalsIgnoreCase( "!dl" ) ) {
 				filterStack.add( new UnsatisfiedSyntaxConstraintFilter( SyntaxConstraint.DL ) );
 			}
 			else if( splits[i].equalsIgnoreCase( "el" ) ) {
-				filterStack.add( new SatisfiedSyntaxConstraintFilter( SyntaxConstraint.EL ) );
+				filterStack.add( SatisfiedSyntaxConstraintFilter.EL );
 			}
 			else if( splits[i].equalsIgnoreCase( "!el" ) ) {
 				filterStack.add( new UnsatisfiedSyntaxConstraintFilter( SyntaxConstraint.EL ) );
 			}
 			else if( splits[i].equalsIgnoreCase( "not" ) ) {
 				FilterCondition a = filterStack.removeLast();
-				filterStack.add( new NegationFilter( a ) );
+				filterStack.add( NegationFilter.not( a ) );
 			}
 			else if( splits[i].equalsIgnoreCase( "or" ) ) {
 				FilterCondition a = filterStack.removeLast();
 				FilterCondition b = filterStack.removeLast();
-				filterStack.add( new DisjunctionFilter( a, b ) );
+				filterStack.add( DisjunctionFilter.or( a, b ) );
 			}
 			else if( splits[i].equalsIgnoreCase( "proposed" ) ) {
-				filterStack.add( new StatusFilter( Status.PROPOSED ) );
+				filterStack.add( StatusFilter.PROPOSED );
 			}
 			else if( splits[i].equalsIgnoreCase( "ql" ) ) {
-				filterStack.add( new SatisfiedSyntaxConstraintFilter( SyntaxConstraint.QL ) );
+				filterStack.add( SatisfiedSyntaxConstraintFilter.QL );
 			}
 			else if( splits[i].equalsIgnoreCase( "!ql" ) ) {
 				filterStack.add( new UnsatisfiedSyntaxConstraintFilter( SyntaxConstraint.QL ) );
@@ -94,10 +93,10 @@ public class FilterConditionParser {
 				filterStack.add( new SemanticsFilter( Semantics.RDF ) );
 			}
 			else if( splits[i].equalsIgnoreCase( "rejected" ) ) {
-				filterStack.add( new StatusFilter( Status.REJECTED ) );
+				filterStack.add( StatusFilter.REJECTED );
 			}
 			else if( splits[i].equalsIgnoreCase( "rl" ) ) {
-				filterStack.add( new SatisfiedSyntaxConstraintFilter( SyntaxConstraint.RL ) );
+				filterStack.add( SatisfiedSyntaxConstraintFilter.RL );
 			}
 			else if( splits[i].equalsIgnoreCase( "!rl" ) ) {
 				filterStack.add( new UnsatisfiedSyntaxConstraintFilter( SyntaxConstraint.RL ) );

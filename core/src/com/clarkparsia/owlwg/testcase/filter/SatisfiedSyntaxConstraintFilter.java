@@ -23,7 +23,16 @@ import com.clarkparsia.owlwg.testcase.TestCase;
  */
 public class SatisfiedSyntaxConstraintFilter implements FilterCondition {
 
-	final private SyntaxConstraint	constraint;
+	public static final SatisfiedSyntaxConstraintFilter	DL, EL, QL, RL;
+
+	static {
+		DL = new SatisfiedSyntaxConstraintFilter( SyntaxConstraint.DL );
+		EL = new SatisfiedSyntaxConstraintFilter( SyntaxConstraint.EL );
+		QL = new SatisfiedSyntaxConstraintFilter( SyntaxConstraint.QL );
+		RL = new SatisfiedSyntaxConstraintFilter( SyntaxConstraint.RL );
+	}
+
+	final private SyntaxConstraint						constraint;
 
 	/**
 	 * @throws NullPointerException

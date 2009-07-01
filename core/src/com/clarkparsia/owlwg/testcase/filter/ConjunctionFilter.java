@@ -1,5 +1,6 @@
 package com.clarkparsia.owlwg.testcase.filter;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 import com.clarkparsia.owlwg.testcase.TestCase;
@@ -24,20 +25,28 @@ import com.clarkparsia.owlwg.testcase.TestCase;
  */
 public class ConjunctionFilter implements FilterCondition {
 
-	final private FilterCondition[]	conditions;
-
-	public ConjunctionFilter(FilterCondition... conditions) {
-		final int n = conditions.length;
-
-		this.conditions = new FilterCondition[n];
-		System.arraycopy( conditions, 0, this.conditions, 0, n );
+	public static ConjunctionFilter and(Collection<? extends FilterCondition> conditions) {
+		return new ConjunctionFilter( conditions );
 	}
+
+	public static ConjunctionFilter and(FilterCondition... conditions) {
+		return and( Arrays.asList( conditions ) );
+	}
+
+	final private FilterCondition[]	conditions;
 
 	public ConjunctionFilter(Collection<? extends FilterCondition> conditions) {
 		if( conditions == null )
 			throw new NullPointerException();
 
 		this.conditions = conditions.toArray( new FilterCondition[0] );
+	}
+
+	public ConjunctionFilter(FilterCondition... conditions) {
+		final int n = conditions.length;
+
+		this.conditions = new FilterCondition[n];
+		System.arraycopy( conditions, 0, this.conditions, 0, n );
 	}
 
 	public boolean accepts(TestCase testcase) {
