@@ -49,9 +49,9 @@ public class FilterConditionParser {
 		String[] splits = filterString.split( "\\s" );
 		for( int i = 0; i < splits.length; i++ ) {
 			if( splits[i].equalsIgnoreCase( "and" ) ) {
-				FilterCondition a = filterStack.removeLast();
-				FilterCondition b = filterStack.removeLast();
-				filterStack.add( ConjunctionFilter.and( a, b ) );
+				ConjunctionFilter and = ConjunctionFilter.and( filterStack );
+				filterStack.clear();
+				filterStack.add( and );
 			}
 			else if( splits[i].equalsIgnoreCase( "approved" ) ) {
 				filterStack.add( StatusFilter.APPROVED );
@@ -76,9 +76,9 @@ public class FilterConditionParser {
 				filterStack.add( NegationFilter.not( a ) );
 			}
 			else if( splits[i].equalsIgnoreCase( "or" ) ) {
-				FilterCondition a = filterStack.removeLast();
-				FilterCondition b = filterStack.removeLast();
-				filterStack.add( DisjunctionFilter.or( a, b ) );
+				DisjunctionFilter or = DisjunctionFilter.or( filterStack );
+				filterStack.clear();
+				filterStack.add( or );
 			}
 			else if( splits[i].equalsIgnoreCase( "proposed" ) ) {
 				filterStack.add( StatusFilter.PROPOSED );
