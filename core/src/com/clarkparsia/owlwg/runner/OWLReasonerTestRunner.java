@@ -39,6 +39,10 @@ public class OWLReasonerTestRunner extends AbstractTestRunner {
 		this.uri = runnerUri;
 	}
 
+	public String getName() {
+		return reasonerFactory.getReasonerName();
+	}
+
 	public URI getURI() {
 		return uri;
 	}

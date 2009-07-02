@@ -36,11 +36,16 @@ public class PelletTestRunner extends AbstractTestRunner {
 	private static final PelletReasonerFactory	reasonerFactory;
 
 	private static final URI					uri;
+
 	static {
 		uri = URI.create( "http://clarkparsia.com/pellet" );
 		reasonerFactory = new PelletReasonerFactory();
 		org.mindswap.pellet.KnowledgeBase.log.setLevel( Level.SEVERE );
 		org.mindswap.pellet.owlapi.Reasoner.log.setLevel( Level.SEVERE );
+	}
+
+	public String getName() {
+		return "Pellet";
 	}
 
 	public URI getURI() {

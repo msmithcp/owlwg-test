@@ -28,6 +28,13 @@ import com.clarkparsia.owlwg.testrun.TestRunResult;
 public interface TestRunner {
 
 	/**
+	 * Get the test runner name.
+	 * 
+	 * @return {@link String} identifying the test runner
+	 */
+	public String getName();
+
+	/**
 	 * Get a URI identifying the test runner. Used as the target of {@code
 	 * results:runner} object property assertions.
 	 * 
@@ -48,11 +55,12 @@ public interface TestRunner {
 	 *         tests attempted.
 	 */
 	public Collection<TestRunResult> run(TestCase testcase, long timeout);
-	
+
 	/**
 	 * Dispose the test runner.
 	 * 
-	 * @throws OWLReasonerException if the runner cannot be disposed.
+	 * @throws OWLReasonerException
+	 *             if the runner cannot be disposed.
 	 */
 	public void dispose() throws OWLReasonerException;
 }

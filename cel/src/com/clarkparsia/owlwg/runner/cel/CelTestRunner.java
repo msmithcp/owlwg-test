@@ -30,6 +30,10 @@ public class CelTestRunner extends AbstractTestRunner {
 		this.reasoner.dispose();
 	}
 
+	public String getName() {
+		return "CEL";
+	}
+
 	public URI getURI() {
 		return uri;
 	}

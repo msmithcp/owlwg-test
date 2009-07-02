@@ -27,8 +27,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.semanticweb.owl.inference.OWLReasonerException;
 import org.semanticweb.owl.model.OWLAnnotation;
+import org.semanticweb.owl.model.OWLAnnotationAxiom;
 import org.semanticweb.owl.model.OWLClassAssertionAxiom;
 import org.semanticweb.owl.model.OWLConstant;
 import org.semanticweb.owl.model.OWLDataPropertyExpression;
@@ -36,7 +36,9 @@ import org.semanticweb.owl.model.OWLDescription;
 import org.semanticweb.owl.model.OWLIndividual;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;
 import org.semanticweb.owl.model.OWLOntology;
+import org.semanticweb.owl.vocab.OWLRDFVocabulary;
 
+import com.clarkparsia.owlwg.runner.ReadOnlyTestRunner;
 import com.clarkparsia.owlwg.runner.TestRunner;
 import com.clarkparsia.owlwg.testcase.SyntaxConstraint;
 import com.clarkparsia.owlwg.testcase.TestCase;
@@ -61,49 +63,6 @@ import com.clarkparsia.owlwg.testcase.TestCase;
  */
 public class TestRunResultParser {
 
-	private static class ReadOnlyTestRunner implements TestRunner {
-
-		final private URI	uri;
-
-		public ReadOnlyTestRunner(URI uri) {
-			this.uri = uri;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if( this == obj )
-				return true;
-
-			if( obj instanceof ReadOnlyTestRunner ) {
-				final ReadOnlyTestRunner other = (ReadOnlyTestRunner) obj;
-				return this.uri.equals( other.uri );
-			}
-
-			return false;
-		}
-
-		public URI getURI() {
-			return uri;
-		}
-
-		@Override
-		public int hashCode() {
-			return uri.hashCode();
-		}
-
-		public Collection<TestRunResult> run(TestCase testcase, long timeout) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public String toString() {
-			return uri.toString();
-		}
-
-		public void dispose() throws OWLReasonerException {
-		}
-	}
-
 	private static final Logger					log;
 
 	private static final Map<URI, TestRunner>	runners;
@@ -113,10 +72,18 @@ public class TestRunResultParser {
 		runners = new HashMap<URI, TestRunner>();
 	}
 
-	private static TestRunner getRunner(URI uri) {
+	private static TestRunner getRunner(OWLIndividual i, OWLOntology o) {
+		final URI uri = i.getURI();
 		TestRunner runner = runners.get( uri );
 		if( runner == null ) {
-			runner = new ReadOnlyTestRunner( uri );
+			String name;
+			Set<OWLAnnotation> s = i.getAnnotations( o, OWLRDFVocabulary.RDFS_LABEL.getURI() );
+			if( (s == null) || s.isEmpty() )
+				name = i.getURI().toASCIIString();
+			else
+				name = s.iterator().next().getAnnotationValue().toString();
+
+			runner = new ReadOnlyTestRunner( uri, name );
 			runners.put( uri, runner );
 		}
 		return runner;
@@ -165,7 +132,7 @@ public class TestRunResultParser {
 								i.getURI(), runnerUris ) );
 				continue;
 			}
-			runner = getRunner( runnerUris.iterator().next().getURI() );
+			runner = getRunner( runnerUris.iterator().next(), o );
 
 			Set<OWLDescription> types = i.getTypes( o );
 
