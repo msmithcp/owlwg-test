@@ -9,8 +9,8 @@ import org.semanticweb.owl.inference.OWLReasonerException;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
 
-import com.clarkparsia.owlwg.runner.AbstractTestRunner;
-import com.clarkparsia.owlwg.runner.OWLReasonerTestRunner;
+import com.clarkparsia.owlwg.owlapi2.runner.impl.OwlApi2ReasonerTestRunner;
+import com.clarkparsia.owlwg.owlapi2.runner.impl.OwlApi2AbstractRunner;
 
 /**
  * <p>
@@ -18,7 +18,7 @@ import com.clarkparsia.owlwg.runner.OWLReasonerTestRunner;
  * </p>
  * <p>
  * Description: Pellet 2.0 based test case runner. More efficient than use of
- * {@link OWLReasonerTestRunner} with Pellet because it uses the Pellet
+ * {@link OwlApi2ReasonerTestRunner} with Pellet because it uses the Pellet
  * entailment checker (which is more efficient for some axioms).
  * </p>
  * <p>
@@ -31,7 +31,7 @@ import com.clarkparsia.owlwg.runner.OWLReasonerTestRunner;
  * 
  * @author Mike Smith &lt;msmith@clarkparsia.com&gt;
  */
-public class PelletTestRunner extends AbstractTestRunner {
+public class PelletTestRunner extends OwlApi2AbstractRunner {
 
 	private static final PelletReasonerFactory	reasonerFactory;
 

@@ -1,8 +1,5 @@
 package com.clarkparsia.owlwg.testcase;
 
-import org.semanticweb.owl.model.OWLIndividual;
-import org.semanticweb.owl.model.OWLOntology;
-
 /**
  * <p>
  * Title: Negative Entailment Test Case
@@ -22,18 +19,5 @@ import org.semanticweb.owl.model.OWLOntology;
  * 
  * @author Mike Smith &lt;msmith@clarkparsia.com&gt;
  */
-public class NegativeEntailmentTest extends AbstractEntailmentTest {
-
-	public NegativeEntailmentTest(OWLOntology ontology, OWLIndividual i) {
-		super( ontology, i, false );
-	}
-
-	public void accept(TestCaseVisitor visitor) {
-		visitor.visit( this );
-	}
-
-	@Override
-	public String toString() {
-		return String.format( "NegativeEntailmentTest(%s)", getIdentifier() );
-	}
+public interface NegativeEntailmentTest<O> extends EntailmentTest<O> {
 }

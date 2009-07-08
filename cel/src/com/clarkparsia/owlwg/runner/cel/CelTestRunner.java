@@ -10,13 +10,13 @@ import org.semanticweb.owl.model.OWLLogicalAxiom;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
 
-import com.clarkparsia.owlwg.runner.AbstractTestRunner;
-import com.clarkparsia.owlwg.runner.EntailmentChecker;
+import com.clarkparsia.owlwg.owlapi2.runner.impl.OwlApi2EntailmentChecker;
+import com.clarkparsia.owlwg.owlapi2.runner.impl.OwlApi2AbstractRunner;
 
 /**
  * Test runner for CEL.
  */
-public class CelTestRunner extends AbstractTestRunner {
+public class CelTestRunner extends OwlApi2AbstractRunner {
 
 	private static final URI uri;
 
@@ -63,7 +63,7 @@ public class CelTestRunner extends AbstractTestRunner {
 		reasoner.loadOntologies(Collections.singleton(premise));
 		reasoner.classify();
 
-		EntailmentChecker checker = new EntailmentChecker(reasoner, manager
+		OwlApi2EntailmentChecker checker = new OwlApi2EntailmentChecker(reasoner, manager
 				.getOWLDataFactory());
 
 		boolean ret = true;

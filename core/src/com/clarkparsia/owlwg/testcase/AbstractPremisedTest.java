@@ -9,12 +9,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.semanticweb.owl.io.StringInputSource;
 import org.semanticweb.owl.model.OWLConstant;
 import org.semanticweb.owl.model.OWLDataPropertyExpression;
 import org.semanticweb.owl.model.OWLIndividual;
 import org.semanticweb.owl.model.OWLOntology;
-import org.semanticweb.owl.model.OWLOntologyCreationException;
 
 /**
  * <p>
@@ -34,16 +32,16 @@ import org.semanticweb.owl.model.OWLOntologyCreationException;
  * 
  * @author Mike Smith &lt;msmith@clarkparsia.com&gt;
  */
-public abstract class AbstractPremisedTest extends AbstractBaseTestCase {
+public abstract class AbstractPremisedTest<O> extends AbstractBaseTestCase<O> implements
+		PremisedTest<O> {
 
-	private static final Logger								log;
+	private static final Logger							log;
 	static {
 		log = Logger.getLogger( AbstractPremisedTest.class.getCanonicalName() );
 	}
 
-	private final EnumSet<SerializationFormat>				premiseFormats;
-	private final EnumMap<SerializationFormat, OWLOntology>	premiseOntology;
-	private final EnumMap<SerializationFormat, String>		premiseOntologyLiteral;
+	private final EnumSet<SerializationFormat>			premiseFormats;
+	private final EnumMap<SerializationFormat, String>	premiseOntologyLiteral;
 
 	public AbstractPremisedTest(OWLOntology ontology, OWLIndividual i) {
 		super( ontology, i );
@@ -51,7 +49,6 @@ public abstract class AbstractPremisedTest extends AbstractBaseTestCase {
 		premiseFormats = EnumSet.noneOf( SerializationFormat.class );
 		premiseOntologyLiteral = new EnumMap<SerializationFormat, String>(
 				SerializationFormat.class );
-		premiseOntology = new EnumMap<SerializationFormat, OWLOntology>( SerializationFormat.class );
 
 		Map<OWLDataPropertyExpression, Set<OWLConstant>> values = i
 				.getDataPropertyValues( ontology );
@@ -77,21 +74,5 @@ public abstract class AbstractPremisedTest extends AbstractBaseTestCase {
 
 	public String getPremiseOntology(SerializationFormat format) {
 		return premiseOntologyLiteral.get( format );
-	}
-
-	public OWLOntology parsePremiseOntology(SerializationFormat format)
-			throws OWLOntologyCreationException {
-		parseAllImportedOntologies();
-		OWLOntology o = premiseOntology.get( format );
-		if( o == null ) {
-			String l = premiseOntologyLiteral.get( format );
-			if( l == null )
-				return null;
-
-			StringInputSource source = new StringInputSource( l );
-			o = getOWLOntologyManager().loadOntology( source );
-			premiseOntology.put( format, o );
-		}
-		return o;
 	}
 }

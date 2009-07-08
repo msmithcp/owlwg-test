@@ -1,8 +1,5 @@
 package com.clarkparsia.owlwg.testcase;
 
-import org.semanticweb.owl.model.OWLIndividual;
-import org.semanticweb.owl.model.OWLOntology;
-
 /**
  * <p>
  * Title: Positive Entailment Test Case
@@ -22,18 +19,5 @@ import org.semanticweb.owl.model.OWLOntology;
  * 
  * @author Mike Smith &lt;msmith@clarkparsia.com&gt;
  */
-public class PositiveEntailmentTest extends AbstractEntailmentTest {
-
-	public PositiveEntailmentTest(OWLOntology ontology, OWLIndividual i) {
-		super( ontology, i, true );
-	}
-
-	public void accept(TestCaseVisitor visitor) {
-		visitor.visit( this );
-	}
-
-	@Override
-	public String toString() {
-		return String.format( "PositiveEntailmentTest(%s)", getIdentifier() );
-	}
+public interface PositiveEntailmentTest<O> extends EntailmentTest<O> {
 }

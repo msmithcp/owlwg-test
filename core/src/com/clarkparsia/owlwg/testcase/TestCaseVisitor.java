@@ -18,13 +18,13 @@ package com.clarkparsia.owlwg.testcase;
  * @author Mike Smith &lt;msmith@clarkparsia.com&gt;
  */
 
-public interface TestCaseVisitor {
+public interface TestCaseVisitor<O> {
 
-	public void visit(ConsistencyTest testcase);
+	public void visit(ConsistencyTest<O> testcase);
 
-	public void visit(InconsistencyTest testcase);
+	public void visit(InconsistencyTest<O> testcase);
 
-	public void visit(PositiveEntailmentTest testcase);
+	public void visit(PositiveEntailmentTest<O> testcase);
 
-	public void visit(NegativeEntailmentTest testcase);
+	public void visit(NegativeEntailmentTest<O> testcase);
 }

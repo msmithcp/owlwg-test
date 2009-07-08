@@ -29,7 +29,9 @@ import org.semanticweb.owl.model.OWLOntologyCreationException;
 import org.semanticweb.owl.model.OWLOntologyManager;
 
 import com.clarkparsia.owlwg.cli.FilterConditionParser;
+import com.clarkparsia.owlwg.owlapi2.testcase.impl.OwlApi2TestCaseFactory;
 import com.clarkparsia.owlwg.testcase.TestCase;
+import com.clarkparsia.owlwg.testcase.TestCaseFactory;
 import com.clarkparsia.owlwg.testcase.filter.FilterCondition;
 
 /**
@@ -139,11 +141,13 @@ public class ListCases {
 
 			OWLOntology casesOntology = manager.loadOntologyFromPhysicalURI( testFileUri );
 
-			TestCollection cases = new TestCollection( casesOntology, filter );
-			List<TestCase> l = cases.asList();
+			TestCaseFactory<OWLOntology> factory = new OwlApi2TestCaseFactory();
+			TestCollection<OWLOntology> cases = new TestCollection<OWLOntology>( factory,
+					casesOntology, filter );
+			List<TestCase<OWLOntology>> l = cases.asList();
 			if( sort ) {
-				Collections.sort( l, new Comparator<TestCase>() {
-					public int compare(TestCase o1, TestCase o2) {
+				Collections.sort( l, new Comparator<TestCase<OWLOntology>>() {
+					public int compare(TestCase<OWLOntology> o1, TestCase<OWLOntology> o2) {
 						return o1.getIdentifier().compareTo( o2.getIdentifier() );
 					}
 				} );

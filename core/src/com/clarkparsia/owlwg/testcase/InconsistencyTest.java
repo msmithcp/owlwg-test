@@ -1,8 +1,5 @@
 package com.clarkparsia.owlwg.testcase;
 
-import org.semanticweb.owl.model.OWLIndividual;
-import org.semanticweb.owl.model.OWLOntology;
-
 /**
  * <p>
  * Title: Inconsistency Test Case
@@ -22,18 +19,5 @@ import org.semanticweb.owl.model.OWLOntology;
  * 
  * @author Mike Smith &lt;msmith@clarkparsia.com&gt;
  */
-public class InconsistencyTest extends AbstractPremisedTest {
-
-	public InconsistencyTest(OWLOntology ontology, OWLIndividual i) {
-		super( ontology, i );
-	}
-
-	public void accept(TestCaseVisitor visitor) {
-		visitor.visit( this );
-	}
-
-	@Override
-	public String toString() {
-		return String.format( "InconsistencyTest(%s)", getIdentifier() );
-	}
+public interface InconsistencyTest<O> extends PremisedTest<O> {
 }

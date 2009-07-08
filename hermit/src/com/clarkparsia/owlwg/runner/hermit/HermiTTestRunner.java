@@ -10,9 +10,9 @@ import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
 
 import com.clarkparsia.owlwg.Harness;
-import com.clarkparsia.owlwg.runner.OWLReasonerTestRunner;
+import com.clarkparsia.owlwg.owlapi2.runner.impl.OwlApi2ReasonerTestRunner;
 
-public class HermiTTestRunner extends OWLReasonerTestRunner {
+public class HermiTTestRunner extends OwlApi2ReasonerTestRunner {
 
     public HermiTTestRunner() {
         super(new Reasoner.ReasonerFactory(), URI

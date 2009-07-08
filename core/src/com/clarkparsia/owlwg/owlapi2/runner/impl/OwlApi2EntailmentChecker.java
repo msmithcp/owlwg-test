@@ -1,4 +1,4 @@
-package com.clarkparsia.owlwg.runner;
+package com.clarkparsia.owlwg.owlapi2.runner.impl;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -55,7 +55,7 @@ import org.semanticweb.owl.model.SWRLRule;
 
 /**
  * <p>
- * Title: Entailment Checker
+ * Title: OWLAPI v2 Entailment Checker
  * </p>
  * <p>
  * Description: Incomplete entailment checking implementation for OWLAPI
@@ -73,8 +73,8 @@ import org.semanticweb.owl.model.SWRLRule;
  * 
  * @author Mike Smith &lt;msmith@clarkparsia.com&gt;
  */
-public class EntailmentChecker implements OWLAxiomVisitor {
-	public static Logger			log			= Logger.getLogger( EntailmentChecker.class
+public class OwlApi2EntailmentChecker implements OWLAxiomVisitor {
+	public static Logger			log			= Logger.getLogger( OwlApi2EntailmentChecker.class
 														.getName() );
 
 	private OWLReasonerException	exception	= null;
@@ -82,7 +82,7 @@ public class EntailmentChecker implements OWLAxiomVisitor {
 	private boolean					isEntailed	= false;
 	private OWLReasoner				reasoner;
 
-	public EntailmentChecker(OWLReasoner reasoner, OWLDataFactory factory) {
+	public OwlApi2EntailmentChecker(OWLReasoner reasoner, OWLDataFactory factory) {
 		this.reasoner = reasoner;
 		this.factory = factory;
 	}

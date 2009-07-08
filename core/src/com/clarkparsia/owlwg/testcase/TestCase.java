@@ -9,7 +9,8 @@ import java.util.Set;
  * </p>
  * <p>
  * Description: Interface based on test cases described at <a
- * href="http://www.w3.org/TR/owl2-test/">http://www.w3.org/TR/owl2-test/</a>
+ * href="http://www.w3.org/TR/owl2-test/">http://www.w3.org/TR/owl2-test/</a>.
+ * Parameterized based on the object returned when parsing an ontology.
  * </p>
  * <p>
  * Copyright: Copyright &copy; 2009
@@ -21,13 +22,15 @@ import java.util.Set;
  * 
  * @author Mike Smith &lt;msmith@clarkparsia.com&gt;
  */
-public interface TestCase {
+public interface TestCase<O> {
 
-	public void accept(TestCaseVisitor visitor);
+	public void accept(TestCaseVisitor<O> visitor);
 
 	public Set<Semantics> getApplicableSemantics();
 
 	public String getIdentifier();
+
+	public Set<URI> getImportedOntologies();
 
 	public String getImportedOntology(URI uri, SerializationFormat format);
 

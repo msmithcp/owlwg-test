@@ -35,9 +35,11 @@ import org.semanticweb.owl.model.OWLOntologyCreationException;
 import org.semanticweb.owl.model.OWLOntologyManager;
 
 import com.clarkparsia.owlwg.cli.FilterConditionParser;
+import com.clarkparsia.owlwg.owlapi2.testcase.impl.OwlApi2TestCaseFactory;
 import com.clarkparsia.owlwg.runner.TestRunner;
 import com.clarkparsia.owlwg.runner.pellet.PelletTestRunner;
 import com.clarkparsia.owlwg.testcase.TestCase;
+import com.clarkparsia.owlwg.testcase.TestCaseFactory;
 import com.clarkparsia.owlwg.testcase.filter.FilterCondition;
 import com.clarkparsia.owlwg.testrun.ResultVocabulary;
 import com.clarkparsia.owlwg.testrun.TestRunResult;
@@ -65,18 +67,24 @@ public class Harness {
 
 	public static final Logger	log;
 	public static final String	TEST_RUNNER_CLASS_PROPERTY;
+	public static final String	TEST_FACTORY_CLASS_PROPERTY;
 
 	static {
 		log = Logger.getLogger( Harness.class.getCanonicalName() );
 
 		TEST_RUNNER_CLASS_PROPERTY = "Harness.TestRunner";
+		TEST_FACTORY_CLASS_PROPERTY = "Harness.TestFactory";
 	}
 
-	public static TestRunner getDefaultRunner() {
+	public static TestRunner<OWLOntology> getDefaultRunner() {
 		return new PelletTestRunner();
 	}
 
-	public static TestRunner getTestRunner() {
+	public static TestCaseFactory<OWLOntology> getDefaultFactory() {
+		return new OwlApi2TestCaseFactory();
+	}
+
+	public static TestRunner<?> getTestRunner() {
 		Class<? extends TestRunner> runner;
 		String clsName = System.getProperty( TEST_RUNNER_CLASS_PROPERTY );
 		if( clsName != null ) {
@@ -106,6 +114,36 @@ public class Harness {
 		}
 	}
 
+	public static TestCaseFactory<?> getTestCaseFactory() {
+		Class<? extends TestCaseFactory> factory;
+		String clsName = System.getProperty( TEST_FACTORY_CLASS_PROPERTY );
+		if( clsName != null ) {
+			try {
+				Class<?> cls = Class.forName( clsName );
+				factory = cls.asSubclass( TestCaseFactory.class );
+				return factory.newInstance();
+			} catch( ClassNotFoundException e ) {
+				log.log( Level.SEVERE, "Test runner class not found: " + clsName, e );
+				return null;
+			} catch( ClassCastException e ) {
+				log.log( Level.SEVERE, format( "Test runner class (%s) does not implement %s",
+						clsName, TestRunner.class.getCanonicalName() ), e );
+				return null;
+			} catch( InstantiationException e ) {
+				log.log( Level.SEVERE, "Instantiation failed for test runner class: " + clsName, e );
+				return null;
+			} catch( IllegalAccessException e ) {
+				log
+						.log( Level.SEVERE, "Illegal access failed for test runner class: "
+								+ clsName, e );
+				return null;
+			}
+		}
+		else {
+			return getDefaultFactory();
+		}
+	}
+
 	public static void main(String[] args) {
 
 		Options options = new Options();
@@ -117,8 +155,7 @@ public class Harness {
 				"Output file for test results (in TURTLE format).  Defaults to stdout." );
 		o.setArgName( "OUTPUT_FILE" );
 		options.addOption( o );
-		o = new Option( "t", "timeout",true,
-				"Per test timeout (in seconds).  Defaults to 60." );
+		o = new Option( "t", "timeout", true, "Per test timeout (in seconds).  Defaults to 60." );
 		o.setArgName( "TIMEOUT" );
 		options.addOption( o );
 
@@ -169,8 +206,12 @@ public class Harness {
 
 		final OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 
-		TestRunner runner = getTestRunner();
+		TestRunner<?> runner = getTestRunner();
 		if( runner == null )
+			return;
+
+		TestCaseFactory<?> factory = getTestCaseFactory();
+		if( factory == null )
 			return;
 
 		try {
@@ -187,7 +228,7 @@ public class Harness {
 			OWLOntology casesOntology = manager.loadOntologyFromPhysicalURI( testFileUri );
 			OWLOntology resultOntology = manager.createOntology( noAxioms );
 
-			TestCollection cases = new TestCollection( casesOntology, filter );
+			TestCollection cases = new TestCollection( factory, casesOntology, filter );
 			Iterator<TestCase> it = cases.asList().iterator();
 			cases = null;
 
@@ -212,7 +253,7 @@ public class Harness {
 				}
 				it.remove();
 			}
-			
+
 			runner.dispose();
 
 			TurtleRenderer renderer = new TurtleRenderer( resultOntology, manager, resultsWriter );

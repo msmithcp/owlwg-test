@@ -1,4 +1,4 @@
-package com.clarkparsia.owlwg.runner;
+package com.clarkparsia.owlwg.owlapi2.runner.impl;
 
 import java.net.URI;
 import java.util.Collections;
@@ -11,9 +11,10 @@ import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
 
 
+
 /**
  * <p>
- * Title: OWL Reasoner Test Runner
+ * Title: OWLAPIv2 Reasoner Test Runner
  * </p>
  * <p>
  * Description: Wrapper to use any reasoner implementing the OWLAPI OWLReasoner
@@ -29,12 +30,12 @@ import org.semanticweb.owl.model.OWLOntologyManager;
  * 
  * @author Mike Smith &lt;msmith@clarkparsia.com&gt;
  */
-public class OWLReasonerTestRunner extends AbstractTestRunner {
+public class OwlApi2ReasonerTestRunner extends OwlApi2AbstractRunner {
 
 	private final OWLReasonerFactory	reasonerFactory;
 	private final URI					uri;
 
-	public OWLReasonerTestRunner(OWLReasonerFactory reasonerFactory, URI runnerUri) {
+	public OwlApi2ReasonerTestRunner(OWLReasonerFactory reasonerFactory, URI runnerUri) {
 		this.reasonerFactory = reasonerFactory;
 		this.uri = runnerUri;
 	}
@@ -57,7 +58,7 @@ public class OWLReasonerTestRunner extends AbstractTestRunner {
 	protected boolean isEntailed(OWLOntologyManager manager, OWLOntology premise,
 			OWLOntology conclusion) throws OWLReasonerException {
 		OWLReasoner reasoner = reasonerFactory.createReasoner( manager );
-		EntailmentChecker checker = new EntailmentChecker( reasoner, manager.getOWLDataFactory() );
+		OwlApi2EntailmentChecker checker = new OwlApi2EntailmentChecker( reasoner, manager.getOWLDataFactory() );
 
 		reasoner.loadOntologies( Collections.singleton( premise ) );
 		for( OWLAxiom axiom : conclusion.getLogicalAxioms() ) {

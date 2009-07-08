@@ -1,4 +1,4 @@
-package com.clarkparsia.owlwg.runner;
+package com.clarkparsia.owlwg.owlapi2.runner.impl;
 
 import static com.clarkparsia.owlwg.testcase.SerializationFormat.RDFXML;
 import static com.clarkparsia.owlwg.testrun.RunResultType.FAILING;
@@ -17,15 +17,17 @@ import java.util.logging.Logger;
 
 import org.semanticweb.owl.inference.OWLReasonerException;
 import org.semanticweb.owl.model.OWLOntology;
-import org.semanticweb.owl.model.OWLOntologyCreationException;
 import org.semanticweb.owl.model.OWLOntologyManager;
 
-import com.clarkparsia.owlwg.testcase.AbstractEntailmentTest;
-import com.clarkparsia.owlwg.testcase.AbstractPremisedTest;
+import com.clarkparsia.owlwg.owlapi2.testcase.impl.OwlApi2Case;
+import com.clarkparsia.owlwg.runner.TestRunner;
 import com.clarkparsia.owlwg.testcase.ConsistencyTest;
+import com.clarkparsia.owlwg.testcase.EntailmentTest;
 import com.clarkparsia.owlwg.testcase.InconsistencyTest;
 import com.clarkparsia.owlwg.testcase.NegativeEntailmentTest;
+import com.clarkparsia.owlwg.testcase.OntologyParseException;
 import com.clarkparsia.owlwg.testcase.PositiveEntailmentTest;
+import com.clarkparsia.owlwg.testcase.PremisedTest;
 import com.clarkparsia.owlwg.testcase.TestCase;
 import com.clarkparsia.owlwg.testcase.TestCaseVisitor;
 import com.clarkparsia.owlwg.testrun.ReasoningRun;
@@ -34,7 +36,7 @@ import com.clarkparsia.owlwg.testrun.TestRunResult;
 
 /**
  * <p>
- * Title: Abstract Test Runner
+ * Title: OWLAPIv2 Abstract Test Runner
  * </p>
  * <p>
  * Description: Base test runner implementation intended to encapsulate
@@ -52,22 +54,19 @@ import com.clarkparsia.owlwg.testrun.TestRunResult;
  * 
  * @author Mike Smith &lt;msmith@clarkparsia.com&gt;
  */
-public abstract class AbstractTestRunner implements TestRunner {
+public abstract class OwlApi2AbstractRunner implements TestRunner<OWLOntology> {
 
-	private static final Logger log;
+	protected abstract class AbstractTestAsRunnable<T extends TestCase<OWLOntology>> implements
+			TestAsRunnable {
 
-	static {
-		log = Logger.getLogger( AbstractTestRunner.class.getCanonicalName() );
-	}
+		protected final OWLOntologyManager	manager;
+		protected TestRunResult				result;
+		protected final T					testcase;
+		protected Throwable					throwable;
+		protected final RunTestType			type;
 
-	protected abstract class AbstractTestAsRunnable<T extends TestCase> implements TestAsRunnable {
-
-		protected TestRunResult		result;
-		protected final T			testcase;
-		protected Throwable			throwable;
-		protected final RunTestType	type;
-
-		public AbstractTestAsRunnable(T testcase, RunTestType type) {
+		public AbstractTestAsRunnable(OWLOntologyManager manager, T testcase, RunTestType type) {
+			this.manager = manager;
 			this.testcase = testcase;
 
 			if( !EnumSet.of( CONSISTENCY, INCONSISTENCY, NEGATIVE_ENTAILMENT, POSITIVE_ENTAILMENT )
@@ -80,7 +79,7 @@ public abstract class AbstractTestRunner implements TestRunner {
 		}
 
 		public TestRunResult getErrorResult(Throwable th) {
-			return new ReasoningRun( testcase, INCOMPLETE, type, AbstractTestRunner.this, th
+			return new ReasoningRun( testcase, INCOMPLETE, type, OwlApi2AbstractRunner.this, th
 					.getMessage() );
 		}
 
@@ -94,41 +93,43 @@ public abstract class AbstractTestRunner implements TestRunner {
 		}
 
 		public TestRunResult getTimeoutResult() {
-			return new ReasoningRun( testcase, INCOMPLETE, type, AbstractTestRunner.this, String
+			return new ReasoningRun( testcase, INCOMPLETE, type, OwlApi2AbstractRunner.this, String
 					.format( "Timeout: %s ms", timeout ) );
 		}
 	}
 
-	private class Runner implements TestCaseVisitor {
+	private class Runner implements TestCaseVisitor<OWLOntology> {
 
-		private TestRunResult[]	results;
+		private OWLOntologyManager	manager;
+		private TestRunResult[]		results;
 
-		public List<TestRunResult> getResults(TestCase testcase) {
+		public List<TestRunResult> getResults(OwlApi2Case testcase) {
 			results = null;
+			manager = testcase.getOWLOntologyManager();
 			testcase.accept( this );
 			return Arrays.asList( results );
 		}
 
-		public void visit(ConsistencyTest testcase) {
+		public void visit(ConsistencyTest<OWLOntology> testcase) {
 			results = new TestRunResult[1];
-			results[0] = runConsistencyTest( testcase );
+			results[0] = runConsistencyTest( manager, testcase );
 		}
 
-		public void visit(InconsistencyTest testcase) {
+		public void visit(InconsistencyTest<OWLOntology> testcase) {
 			results = new TestRunResult[1];
-			results[0] = runInconsistencyTest( testcase );
+			results[0] = runInconsistencyTest( manager, testcase );
 		}
 
-		public void visit(NegativeEntailmentTest testcase) {
+		public void visit(NegativeEntailmentTest<OWLOntology> testcase) {
 			results = new TestRunResult[2];
-			results[0] = runConsistencyTest( testcase );
-			results[1] = runEntailmentTest( testcase );
+			results[0] = runConsistencyTest( manager, testcase );
+			results[1] = runEntailmentTest( manager, testcase );
 		}
 
-		public void visit(PositiveEntailmentTest testcase) {
+		public void visit(PositiveEntailmentTest<OWLOntology> testcase) {
 			results = new TestRunResult[2];
-			results[0] = runConsistencyTest( testcase );
-			results[1] = runEntailmentTest( testcase );
+			results[0] = runConsistencyTest( manager, testcase );
+			results[1] = runEntailmentTest( manager, testcase );
 		}
 	}
 
@@ -140,10 +141,11 @@ public abstract class AbstractTestRunner implements TestRunner {
 		public TestRunResult getTimeoutResult();
 	}
 
-	protected class XConsistencyTest extends AbstractTestAsRunnable<AbstractPremisedTest> {
+	protected class XConsistencyTest extends AbstractTestAsRunnable<PremisedTest<OWLOntology>> {
 
-		public XConsistencyTest(AbstractPremisedTest testcase, RunTestType type) {
-			super( testcase, type );
+		public XConsistencyTest(OWLOntologyManager manager, PremisedTest<OWLOntology> testcase,
+				RunTestType type) {
+			super( manager, testcase, type );
 
 			if( !EnumSet.of( CONSISTENCY, INCONSISTENCY ).contains( type ) )
 				throw new IllegalArgumentException();
@@ -151,7 +153,7 @@ public abstract class AbstractTestRunner implements TestRunner {
 
 		public void run() {
 			if( !testcase.getPremiseFormats().contains( RDFXML ) ) {
-				result = new ReasoningRun( testcase, INCOMPLETE, type, AbstractTestRunner.this,
+				result = new ReasoningRun( testcase, INCOMPLETE, type, OwlApi2AbstractRunner.this,
 						"Only RDF/XML input ontology parsing supported by harness." );
 				return;
 			}
@@ -159,34 +161,35 @@ public abstract class AbstractTestRunner implements TestRunner {
 			OWLOntology o;
 			try {
 				o = testcase.parsePremiseOntology( RDFXML );
-			} catch( OWLOntologyCreationException e ) {
-				result = new ReasoningRun( testcase, INCOMPLETE, type, AbstractTestRunner.this,
+			} catch( OntologyParseException e ) {
+				result = new ReasoningRun( testcase, INCOMPLETE, type, OwlApi2AbstractRunner.this,
 						"Exception parsing premise ontology: " + e.getLocalizedMessage() );
 				return;
 			}
 
 			try {
-				final boolean consistent = isConsistent( testcase.getOWLOntologyManager(), o );
+				final boolean consistent = isConsistent( manager, o );
 				if( consistent )
 					result = new ReasoningRun( testcase, CONSISTENCY.equals( type )
 						? PASSING
-						: FAILING, type, AbstractTestRunner.this );
+						: FAILING, type, OwlApi2AbstractRunner.this );
 				else
 					result = new ReasoningRun( testcase, INCONSISTENCY.equals( type )
 						? PASSING
-						: FAILING, type, AbstractTestRunner.this );
+						: FAILING, type, OwlApi2AbstractRunner.this );
 			} catch( Throwable th ) {
-				result = new ReasoningRun( testcase, INCOMPLETE, type, AbstractTestRunner.this,
+				result = new ReasoningRun( testcase, INCOMPLETE, type, OwlApi2AbstractRunner.this,
 						"Caught throwable: " + th.getLocalizedMessage() );
 			}
 		}
 
 	}
 
-	protected class XEntailmentTest extends AbstractTestAsRunnable<AbstractEntailmentTest> {
+	protected class XEntailmentTest extends AbstractTestAsRunnable<EntailmentTest<OWLOntology>> {
 
-		public XEntailmentTest(AbstractEntailmentTest testcase, RunTestType type) {
-			super( testcase, type );
+		public XEntailmentTest(OWLOntologyManager manager, EntailmentTest<OWLOntology> testcase,
+				RunTestType type) {
+			super( manager, testcase, type );
 
 			if( !EnumSet.of( POSITIVE_ENTAILMENT, NEGATIVE_ENTAILMENT ).contains( type ) )
 				throw new IllegalArgumentException();
@@ -194,12 +197,12 @@ public abstract class AbstractTestRunner implements TestRunner {
 
 		public void run() {
 			if( !testcase.getPremiseFormats().contains( RDFXML ) ) {
-				result = new ReasoningRun( testcase, INCOMPLETE, type, AbstractTestRunner.this,
+				result = new ReasoningRun( testcase, INCOMPLETE, type, OwlApi2AbstractRunner.this,
 						"Only RDF/XML input ontology parsing supported by harness." );
 				return;
 			}
 			if( !testcase.getConclusionFormats().contains( RDFXML ) ) {
-				result = new ReasoningRun( testcase, INCOMPLETE, type, AbstractTestRunner.this,
+				result = new ReasoningRun( testcase, INCOMPLETE, type, OwlApi2AbstractRunner.this,
 						"Only RDF/XML input ontology parsing supported by harness." );
 				return;
 			}
@@ -208,35 +211,43 @@ public abstract class AbstractTestRunner implements TestRunner {
 			try {
 				premise = testcase.parsePremiseOntology( RDFXML );
 				conclusion = testcase.parseConclusionOntology( RDFXML );
-			} catch( OWLOntologyCreationException e ) {
-				result = new ReasoningRun( testcase, INCOMPLETE, type, AbstractTestRunner.this,
+			} catch( OntologyParseException e ) {
+				result = new ReasoningRun( testcase, INCOMPLETE, type, OwlApi2AbstractRunner.this,
 						"Exception parsing input ontology: " + e.getLocalizedMessage() );
 				return;
 			}
 
 			try {
-				boolean entailed = isEntailed( testcase.getOWLOntologyManager(), premise,
-						conclusion );
+				boolean entailed = isEntailed( manager, premise, conclusion );
 				if( entailed )
 					result = new ReasoningRun( testcase, POSITIVE_ENTAILMENT.equals( type )
 						? PASSING
-						: FAILING, type, AbstractTestRunner.this );
+						: FAILING, type, OwlApi2AbstractRunner.this );
 				else
 					result = new ReasoningRun( testcase, NEGATIVE_ENTAILMENT.equals( type )
 						? PASSING
-						: FAILING, type, AbstractTestRunner.this );
+						: FAILING, type, OwlApi2AbstractRunner.this );
 			} catch( Throwable th ) {
-				result = new ReasoningRun( testcase, INCOMPLETE, type, AbstractTestRunner.this,
+				result = new ReasoningRun( testcase, INCOMPLETE, type, OwlApi2AbstractRunner.this,
 						"Caught throwable: " + th.getLocalizedMessage() );
 			}
 		}
 	}
 
-	private final Runner	runner;
-	private long			timeout;
+	private static final Logger	log;
 
-	public AbstractTestRunner() {
+	static {
+		log = Logger.getLogger( OwlApi2AbstractRunner.class.getCanonicalName() );
+	}
+
+	private final Runner		runner;
+	private long				timeout;
+
+	public OwlApi2AbstractRunner() {
 		runner = new Runner();
+	}
+
+	public void dispose() throws OWLReasonerException {
 	}
 
 	protected abstract boolean isConsistent(OWLOntologyManager manager, OWLOntology o)
@@ -272,27 +283,31 @@ public abstract class AbstractTestRunner implements TestRunner {
 		}
 	}
 
-	public Collection<TestRunResult> run(TestCase testcase, long timeout) {
+	public Collection<TestRunResult> run(TestCase<OWLOntology> testcase, long timeout) {
 		this.timeout = timeout;
-		return runner.getResults( testcase );
+		if( testcase instanceof OwlApi2Case )
+			return runner.getResults( (OwlApi2Case) testcase );
+		else
+			throw new IllegalArgumentException();
 	}
 
-	protected TestRunResult runConsistencyTest(AbstractPremisedTest testcase) {
-		return run( new XConsistencyTest( testcase, CONSISTENCY ) );
+	protected TestRunResult runConsistencyTest(OWLOntologyManager manager,
+			PremisedTest<OWLOntology> testcase) {
+		return run( new XConsistencyTest( manager, testcase, CONSISTENCY ) );
 	}
 
-	protected TestRunResult runEntailmentTest(NegativeEntailmentTest testcase) {
-		return run( new XEntailmentTest( testcase, NEGATIVE_ENTAILMENT ) );
+	protected TestRunResult runEntailmentTest(OWLOntologyManager manager,
+			NegativeEntailmentTest<OWLOntology> testcase) {
+		return run( new XEntailmentTest( manager, testcase, NEGATIVE_ENTAILMENT ) );
 	}
 
-	protected TestRunResult runEntailmentTest(PositiveEntailmentTest testcase) {
-		return run( new XEntailmentTest( testcase, POSITIVE_ENTAILMENT ) );
+	protected TestRunResult runEntailmentTest(OWLOntologyManager manager,
+			PositiveEntailmentTest<OWLOntology> testcase) {
+		return run( new XEntailmentTest( manager, testcase, POSITIVE_ENTAILMENT ) );
 	}
 
-	protected TestRunResult runInconsistencyTest(AbstractPremisedTest testcase) {
-		return run( new XConsistencyTest( testcase, INCONSISTENCY ) );
-	}
-	
-	public void dispose() throws OWLReasonerException {
+	protected TestRunResult runInconsistencyTest(OWLOntologyManager manager,
+			InconsistencyTest<OWLOntology> testcase) {
+		return run( new XConsistencyTest( manager, testcase, INCONSISTENCY ) );
 	}
 }

@@ -1,7 +1,5 @@
 package com.clarkparsia.owlwg.testcase;
 
-import org.semanticweb.owl.model.OWLIndividual;
-import org.semanticweb.owl.model.OWLOntology;
 
 /**
  * <p>
@@ -22,19 +20,5 @@ import org.semanticweb.owl.model.OWLOntology;
  * 
  * @author Mike Smith &lt;msmith@clarkparsia.com&gt;
  */
-public class ConsistencyTest extends AbstractPremisedTest {
-
-	public ConsistencyTest(OWLOntology ontology, OWLIndividual i) {
-		super( ontology, i );
-	}
-
-	public void accept(TestCaseVisitor visitor) {
-		visitor.visit( this );
-	}
-
-	@Override
-	public String toString() {
-		return String.format( "ConsistencyTest(%s)", getIdentifier() );
-	}
-
+public interface ConsistencyTest<O> extends PremisedTest<O> {
 }

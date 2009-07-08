@@ -9,12 +9,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.semanticweb.owl.io.StringInputSource;
 import org.semanticweb.owl.model.OWLConstant;
 import org.semanticweb.owl.model.OWLDataPropertyExpression;
 import org.semanticweb.owl.model.OWLIndividual;
 import org.semanticweb.owl.model.OWLOntology;
-import org.semanticweb.owl.model.OWLOntologyCreationException;
 
 /**
  * <p>
@@ -34,25 +32,23 @@ import org.semanticweb.owl.model.OWLOntologyCreationException;
  * 
  * @author Mike Smith &lt;msmith@clarkparsia.com&gt;
  */
-public abstract class AbstractEntailmentTest extends AbstractPremisedTest {
+public abstract class AbstractEntailmentTest<O> extends AbstractPremisedTest<O> implements
+		EntailmentTest<O> {
 
-	private static final Logger								log;
+	private static final Logger							log;
 
 	static {
 		log = Logger.getLogger( AbstractEntailmentTest.class.getCanonicalName() );
 	}
 
-	private final EnumSet<SerializationFormat>				conclusionFormats;
-	private final EnumMap<SerializationFormat, OWLOntology>	conclusionOntology;
-	private final EnumMap<SerializationFormat, String>		conclusionOntologyLiteral;
+	private final EnumSet<SerializationFormat>			conclusionFormats;
+	private final EnumMap<SerializationFormat, String>	conclusionOntologyLiteral;
 
 	public AbstractEntailmentTest(OWLOntology ontology, OWLIndividual i, boolean positive) {
 		super( ontology, i );
 
 		conclusionFormats = EnumSet.noneOf( SerializationFormat.class );
 		conclusionOntologyLiteral = new EnumMap<SerializationFormat, String>(
-				SerializationFormat.class );
-		conclusionOntology = new EnumMap<SerializationFormat, OWLOntology>(
 				SerializationFormat.class );
 
 		Map<OWLDataPropertyExpression, Set<OWLConstant>> values = i
@@ -81,21 +77,5 @@ public abstract class AbstractEntailmentTest extends AbstractPremisedTest {
 
 	public String getConclusionOntology(SerializationFormat format) {
 		return conclusionOntologyLiteral.get( format );
-	}
-
-	public OWLOntology parseConclusionOntology(SerializationFormat format)
-			throws OWLOntologyCreationException {
-		parseAllImportedOntologies();
-		OWLOntology o = conclusionOntology.get( format );
-		if( o == null ) {
-			String l = conclusionOntologyLiteral.get( format );
-			if( l == null )
-				return null;
-
-			StringInputSource source = new StringInputSource( l );
-			o = getOWLOntologyManager().loadOntology( source );
-			conclusionOntology.put( format, o );
-		}
-		return o;
 	}
 }

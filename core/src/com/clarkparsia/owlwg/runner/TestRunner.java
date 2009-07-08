@@ -25,7 +25,7 @@ import com.clarkparsia.owlwg.testrun.TestRunResult;
  * 
  * @author Mike Smith &lt;msmith@clarkparsia.com&gt;
  */
-public interface TestRunner {
+public interface TestRunner<O> {
 
 	/**
 	 * Get the test runner name.
@@ -54,7 +54,7 @@ public interface TestRunner {
 	 * @return a collection of {@link TestRunResult} objects describing all
 	 *         tests attempted.
 	 */
-	public Collection<TestRunResult> run(TestCase testcase, long timeout);
+	public Collection<TestRunResult> run(TestCase<O> testcase, long timeout);
 
 	/**
 	 * Dispose the test runner.
