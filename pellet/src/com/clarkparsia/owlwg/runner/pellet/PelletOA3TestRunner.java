@@ -8,7 +8,9 @@ import org.semanticweb.owlapi.inference.OWLReasonerException;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
+import com.clarkparsia.owlwg.Harness;
 import com.clarkparsia.owlwg.owlapi3.runner.impl.OwlApi3AbstractRunner;
+import com.clarkparsia.owlwg.owlapi3.testcase.impl.OwlApi3TestCaseFactory;
 import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
 import com.clarkparsia.pellet.owlapiv3.Reasoner;
 
@@ -65,5 +67,13 @@ public class PelletOA3TestRunner extends OwlApi3AbstractRunner {
 				.<OWLOntology> emptySet() );
 		reasoner.loadOntology( premise );
 		return reasoner.isEntailed( conclusion );
+	}
+
+	public static void main(String[] args) {
+		System.setProperty( Harness.TEST_RUNNER_CLASS_PROPERTY, PelletOA3TestRunner.class
+				.getCanonicalName() );
+		System.setProperty( Harness.TEST_FACTORY_CLASS_PROPERTY, OwlApi3TestCaseFactory.class
+				.getCanonicalName() );
+		Harness.main( args );
 	}
 }
