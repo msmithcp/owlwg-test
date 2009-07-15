@@ -28,6 +28,7 @@ import com.clarkparsia.owlwg.testcase.NegativeEntailmentTest;
 import com.clarkparsia.owlwg.testcase.OntologyParseException;
 import com.clarkparsia.owlwg.testcase.PositiveEntailmentTest;
 import com.clarkparsia.owlwg.testcase.PremisedTest;
+import com.clarkparsia.owlwg.testcase.SerializationFormat;
 import com.clarkparsia.owlwg.testcase.TestCase;
 import com.clarkparsia.owlwg.testcase.TestCaseVisitor;
 import com.clarkparsia.owlwg.testrun.ReasoningRun;
@@ -55,6 +56,13 @@ import com.clarkparsia.owlwg.testrun.TestRunResult;
  * @author Mike Smith &lt;msmith@clarkparsia.com&gt;
  */
 public abstract class OwlApi3AbstractRunner implements TestRunner<OWLOntology> {
+
+	private static final SerializationFormat[]	formatList;
+
+	static {
+		formatList = new SerializationFormat[] {
+			SerializationFormat.RDFXML, SerializationFormat.FUNCTIONAL, SerializationFormat.OWLXML };
+	}
 
 	protected abstract class AbstractTestAsRunnable<T extends TestCase<OWLOntology>> implements
 			TestAsRunnable {
@@ -152,15 +160,22 @@ public abstract class OwlApi3AbstractRunner implements TestRunner<OWLOntology> {
 		}
 
 		public void run() {
-			if( !testcase.getPremiseFormats().contains( RDFXML ) ) {
+			SerializationFormat fmt = null;
+			for( SerializationFormat f : formatList ) {
+				if( testcase.getPremiseFormats().contains( f ) ) {
+					fmt = f;
+					break;
+				}
+			}
+			if( fmt == null ) {
 				result = new ReasoningRun( testcase, INCOMPLETE, type, OwlApi3AbstractRunner.this,
-						"Only RDF/XML input ontology parsing supported by harness." );
+						"No acceptable serialization formats found for premise ontology." );
 				return;
 			}
 
 			OWLOntology o;
 			try {
-				o = testcase.parsePremiseOntology( RDFXML );
+				o = testcase.parsePremiseOntology( fmt );
 			} catch( OntologyParseException e ) {
 				result = new ReasoningRun( testcase, INCOMPLETE, type, OwlApi3AbstractRunner.this,
 						"Exception parsing premise ontology: " + e.getLocalizedMessage() );
@@ -196,21 +211,34 @@ public abstract class OwlApi3AbstractRunner implements TestRunner<OWLOntology> {
 		}
 
 		public void run() {
-			if( !testcase.getPremiseFormats().contains( RDFXML ) ) {
+			SerializationFormat pFmt = null, cFmt = null;
+			for( SerializationFormat f : formatList ) {
+				if( testcase.getPremiseFormats().contains( f ) ) {
+					pFmt = f;
+					break;
+				}
+			}
+			if( pFmt == null ) {
 				result = new ReasoningRun( testcase, INCOMPLETE, type, OwlApi3AbstractRunner.this,
-						"Only RDF/XML input ontology parsing supported by harness." );
+						"No acceptable serialization formats found for premise ontology." );
 				return;
 			}
-			if( !testcase.getConclusionFormats().contains( RDFXML ) ) {
+			for( SerializationFormat f : formatList ) {
+				if( testcase.getConclusionFormats().contains( f ) ) {
+					cFmt = f;
+					break;
+				}
+			}
+			if( cFmt == null ) {
 				result = new ReasoningRun( testcase, INCOMPLETE, type, OwlApi3AbstractRunner.this,
-						"Only RDF/XML input ontology parsing supported by harness." );
+						"No acceptable serialization formats found for conclusion ontology." );
 				return;
 			}
 
 			OWLOntology premise, conclusion;
 			try {
-				premise = testcase.parsePremiseOntology( RDFXML );
-				conclusion = testcase.parseConclusionOntology( RDFXML );
+				premise = testcase.parsePremiseOntology( pFmt );
+				conclusion = testcase.parseConclusionOntology( cFmt );
 			} catch( OntologyParseException e ) {
 				result = new ReasoningRun( testcase, INCOMPLETE, type, OwlApi3AbstractRunner.this,
 						"Exception parsing input ontology: " + e.getLocalizedMessage() );
