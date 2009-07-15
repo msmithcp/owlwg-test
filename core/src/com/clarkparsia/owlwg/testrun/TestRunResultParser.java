@@ -28,7 +28,6 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import org.semanticweb.owl.model.OWLAnnotation;
-import org.semanticweb.owl.model.OWLAnnotationAxiom;
 import org.semanticweb.owl.model.OWLClassAssertionAxiom;
 import org.semanticweb.owl.model.OWLConstant;
 import org.semanticweb.owl.model.OWLDataPropertyExpression;
@@ -63,18 +62,18 @@ import com.clarkparsia.owlwg.testcase.TestCase;
  */
 public class TestRunResultParser {
 
-	private static final Logger					log;
+	private static final Logger						log;
 
-	private static final Map<URI, TestRunner>	runners;
+	private static final Map<URI, TestRunner<?>>	runners;
 
 	static {
 		log = Logger.getLogger( TestRunResultParser.class.getCanonicalName() );
-		runners = new HashMap<URI, TestRunner>();
+		runners = new HashMap<URI, TestRunner<?>>();
 	}
 
-	private static TestRunner getRunner(OWLIndividual i, OWLOntology o) {
+	private static TestRunner<?> getRunner(OWLIndividual i, OWLOntology o) {
 		final URI uri = i.getURI();
-		TestRunner runner = runners.get( uri );
+		TestRunner<?> runner = runners.get( uri );
 		if( runner == null ) {
 			String name;
 			Set<OWLAnnotation> s = i.getAnnotations( o, OWLRDFVocabulary.RDFS_LABEL.getURI() );
@@ -89,7 +88,7 @@ public class TestRunResultParser {
 		return runner;
 	}
 
-	public Collection<TestRunResult> getResults(OWLOntology o, Map<String, TestCase> tests) {
+	public Collection<TestRunResult> getResults(OWLOntology o, Map<String, ? extends TestCase<?>> tests) {
 
 		List<TestRunResult> results = new ArrayList<TestRunResult>();
 
@@ -109,7 +108,7 @@ public class TestRunResultParser {
 					.next().getDataPropertyValues( o );
 
 			Set<OWLConstant> ids = testDValues.get( IDENTIFIER.getOWLDataProperty() );
-			TestCase testCase = null;
+			TestCase<?> testCase = null;
 			for( OWLConstant c : ids ) {
 				String id = c.getLiteral();
 				testCase = tests.get( id );
@@ -124,7 +123,7 @@ public class TestRunResultParser {
 			}
 
 			Set<OWLIndividual> runnerUris = oValues.get( RUNNER.getOWLObjectProperty() );
-			TestRunner runner = null;
+			TestRunner<?> runner = null;
 			if( runnerUris.size() != 1 ) {
 				log
 						.warning( format(
