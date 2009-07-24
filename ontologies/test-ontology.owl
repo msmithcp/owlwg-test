@@ -110,6 +110,7 @@
 	        <rdf:Description rdf:about="&test;Proposed" />
 	        <rdf:Description rdf:about="&test;Approved" />
 	        <rdf:Description rdf:about="&test;Rejected" />
+	        <rdf:Description rdf:about="&test;Extracredit" />
 	      </owl:oneOf>
 	    </owl:Class>
 	  </rdfs:range>
@@ -120,6 +121,7 @@
 	    <rdf:Description rdf:about="&test;Proposed" />
 	    <rdf:Description rdf:about="&test;Approved" />
 	    <rdf:Description rdf:about="&test;Rejected" />
+	    <rdf:Description rdf:about="&test;Extracredit" />
 	  </owl:members>
 	</owl:AllDifferent>
 

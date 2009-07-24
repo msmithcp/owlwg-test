@@ -71,6 +71,9 @@ public class FilterConditionParser {
 			else if( splits[i].equalsIgnoreCase( "!el" ) ) {
 				filterStack.add( new UnsatisfiedSyntaxConstraintFilter( SyntaxConstraint.EL ) );
 			}
+			else if( splits[i].equalsIgnoreCase( "extracredit" ) ) {
+				filterStack.add( StatusFilter.EXTRACREDIT );
+			}
 			else if( splits[i].equalsIgnoreCase( "not" ) ) {
 				FilterCondition a = filterStack.removeLast();
 				filterStack.add( NegationFilter.not( a ) );

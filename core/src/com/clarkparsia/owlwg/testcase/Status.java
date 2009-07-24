@@ -24,7 +24,8 @@ import com.clarkparsia.owlwg.testcase.TestVocabulary.Individual;
  */
 public enum Status {
 
-	APPROVED(Individual.APPROVED), PROPOSED(Individual.PROPOSED), REJECTED(Individual.REJECTED);
+	APPROVED(Individual.APPROVED), EXTRACREDIT(Individual.EXTRACREDIT),
+	PROPOSED(Individual.PROPOSED), REJECTED(Individual.REJECTED);
 
 	public static Status get(OWLIndividual i) {
 		for( Status s : Status.values() ) {

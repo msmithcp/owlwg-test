@@ -23,10 +23,11 @@ import com.clarkparsia.owlwg.testcase.TestCase;
  */
 public class StatusFilter implements FilterCondition {
 
-	public final static StatusFilter	APPROVED, NOSTATUS, PROPOSED, REJECTED;
+	public final static StatusFilter	APPROVED, EXTRACREDIT, NOSTATUS, PROPOSED, REJECTED;
 
 	static {
 		APPROVED = new StatusFilter( Status.APPROVED );
+		EXTRACREDIT = new StatusFilter( Status.EXTRACREDIT );
 		NOSTATUS = new StatusFilter( null );
 		PROPOSED = new StatusFilter( Status.PROPOSED );
 		REJECTED = new StatusFilter( Status.REJECTED );
