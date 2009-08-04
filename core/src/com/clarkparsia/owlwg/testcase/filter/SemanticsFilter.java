@@ -1,6 +1,7 @@
 package com.clarkparsia.owlwg.testcase.filter;
 
 import com.clarkparsia.owlwg.testcase.Semantics;
+import com.clarkparsia.owlwg.testcase.SyntaxConstraint;
 import com.clarkparsia.owlwg.testcase.TestCase;
 
 /**
@@ -22,6 +23,13 @@ import com.clarkparsia.owlwg.testcase.TestCase;
  * @author Mike Smith &lt;msmith@clarkparsia.com&gt;
  */
 public class SemanticsFilter implements FilterCondition {
+	
+	public static final SemanticsFilter	DIRECT, RDF;
+
+	static {
+		DIRECT = new SemanticsFilter( Semantics.DIRECT );
+		RDF = new SemanticsFilter( Semantics.RDF );
+	}
 
 	final private Semantics	semantics;
 
