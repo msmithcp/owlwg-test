@@ -47,8 +47,8 @@ public class TestVocabulary {
 	}
 
 	public enum DatatypeProperty {
-		FUNCTIONAL_CONCLUSION_ONTOLOGY("fsInputOntology"),
-		FUNCTIONAL_INPUT_ONTOLOGY("fsConclusionOntology"),
+		FUNCTIONAL_CONCLUSION_ONTOLOGY("fsConclusionOntology"),
+		FUNCTIONAL_INPUT_ONTOLOGY("fsInputOntology"),
 		FUNCTIONAL_NONCONCLUSION_ONTOLOGY("fsNonConclusionOntology"),
 		FUNCTIONAL_PREMISE_ONTOLOGY("fsPremiseOntology"), IDENTIFIER("identifier"),
 		OWLXML_CONCLUSION_ONTOLOGY("owlXmlConclusionOntology"),
